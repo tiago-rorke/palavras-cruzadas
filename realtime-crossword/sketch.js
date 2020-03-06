@@ -108,7 +108,8 @@ function newWord() {
    if (words.length == 0) {
       // if this is the first word, choose a random location
       let dir = random() >= 0.5;
-      addWord(word, round(random(0,max_x-l)), round(random(0,max_y-l)), dir)
+      //addWord(word, round(random(0,max_x-l)), round(random(0,max_y-l)), dir)
+      addWord(word, 15, 15, true)
    } else {
       // otherwise search for a suitable location
       wordsearch(word);
@@ -122,28 +123,39 @@ function wordsearch(word) {
    let l = word.length;
    let positions = [];
 
-   console.log('starting wordsearch');
+   console.log('starting wordsearch for word', word);
    // horizontal positions
+   console.log('horizontals:');
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
          let score = x<=max_x-l ? testFit(word, x, y, true) : -1;
          positions[y*max_x + x] = score;
+         if(score>0)
+            console.log('h', score);
       }
    }
    let p = positions.length;
+   console.log('h-search done', positions.length);
    // vertical positions
+   console.log('verticals:');
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
          let score = y<=max_y-l ? testFit(word, x, y, false) : -1;
-         positions[positions + y*max_x + x] = score;
+         positions[p + y*max_x + x] = score;
+         if(score>0)
+            console.log('v', score);
       }
    }
+   console.log('v-search done', positions.length);
 
    console.log('tested', positions.length, 'positions');
    // find the best scoring positions
    let highscore = -1;
    let best_positions = [];
+   console.log('all position scores:');
    for (let i=0; i<positions.length; i++) {
+      if(positions[i] >= 0)
+         console.log(positions[i]);
       if (positions[i] >= 0) {
          if (positions[i] == highscore) {
             best_positions.push(i);
@@ -178,17 +190,25 @@ function testFit(word, x, y, horizontal) {
          if (letters[x+i][y] == word.charAt(i)) {
             // if the letter matches, check to see if the word has already been crossed
             let crossed_id = ids[x+i][y];
+            let overlap = false;
+            console.log('checking for letter: ', word.charAt(i))
+            console.log('h cross found with id:', crossed_id);
             for (let h=0; h<crossed_ids.length; h++) {
                if (crossed_ids[h] == crossed_id) {
-                  // if it has, fail the test
-                  score = -1;
-                  break;
+                  overlap = true;
                }
             }
+            // if it has, fail the test
+            if(overlap) {
+               score = -1;
+               break;
+            }
+            console.log('overlap block');
             // otherwise, increment the score
             score++;
             // and save the id of the crossed word
-            crossed_ids.push();
+            crossed_ids.push(crossed_id);
+            console.log('h crossed word', score);
          } else if (ids[x+i][y] >= 0) {
             // otherwise if the square is occupied, fail the test
             score = -1;
@@ -210,6 +230,8 @@ function testFit(word, x, y, horizontal) {
 
          if (letters[x][y+i] == word.charAt(i)) {
             let crossed_id = ids[x][y+i];
+            console.log('checking for letter: ', word.charAt(i))
+            console.log('v cross found with id:', crossed_id);
             for (let h=0; h<crossed_ids.length; h++) {
                if (crossed_ids[h] == crossed_id) {
                   score = -1;
@@ -217,7 +239,8 @@ function testFit(word, x, y, horizontal) {
                }
             }
             score ++;
-            crossed_ids.push();
+            crossed_ids.push(crossed_id);
+            console.log('v crossed word', score);
          } else if (ids[x][y+i] >= 0) {
             score = -1;
             break;
