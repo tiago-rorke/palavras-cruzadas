@@ -209,7 +209,15 @@ function testFit(word, x, y, horizontal) {
       } else {
 
          if (letters[x][y+i] == word.charAt(i)) {
+            let crossed_id = ids[x][y+i];
+            for (let h=0; h<crossed_ids.length; h++) {
+               if (crossed_ids[h] == crossed_id) {
+                  score = -1;
+                  break;
+               }
+            }
             score ++;
+            crossed_ids.push();
          } else if (ids[x][y+i] >= 0) {
             score = -1;
             break;
@@ -228,15 +236,15 @@ function testFit(word, x, y, horizontal) {
       }
    }
 
-   if (score >= 0) {
-      console.log(score);
+   // fill testfit array with alpha values
+   if (score > 0) { // show valid positions that cross existing words
+   // if (score == 0) { // show new valid positions in empty space
+      //console.log(score);
       for (let i=0; i<l; i++) {
-         //let a = score>0 ? 150 : 50;
-         let a = score == 0 ? 20 : 0;
          if (horizontal) {
-            testfits[x+i][y] += a;
+            testfits[x+i][y] += 50;
          } else {
-            testfits[x][y+i] += a;
+            testfits[x][y+i] += 50;
          }
       }
    }
@@ -298,7 +306,6 @@ function drawLayout() {
       }
    }
 }
-
 
 function drawTestfits() {
    noStroke();
