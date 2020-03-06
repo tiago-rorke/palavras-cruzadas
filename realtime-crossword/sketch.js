@@ -64,8 +64,20 @@ let words = [];
 // 2D array for debugging testfit word locations
 let testfits = [];
 
+let grid = [];
+
 let button;
 let textbox;
+
+class square {
+   constructor() {
+      this.id1 = -1;
+      this.id2 = -1;
+      this.letter = ' ';
+      this.testfit = 0;
+   }
+
+}
 
 
 function setup() {
@@ -74,13 +86,19 @@ function setup() {
    max_x = floor(canvas_width/square_size);
    max_y = floor(canvas_height/square_size);
    for (let x=0; x<max_x; x++) {
+      grid[x] = []
+      /*
       ids[x] = []
       letters[x] = []
       testfits[x] = []
+      */
       for (let y=0; y<max_y; y++) {
+         grid[x][y] = new square();
+         /*
          ids[x][y] = -1;
          letters[x][y] = ' ';
          testfits[x][y] = 0;
+         */
       }
    }
    button = createButton('add word');
@@ -114,7 +132,8 @@ function newWord() {
    // clear the testfit debugging array
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
-         testfits[x][y] = 0;
+         grid[x][y].testfit = 0;
+         //testfits[x][y] = 0;
       }
    }
 
@@ -212,9 +231,11 @@ function testFit(word, x, y, horizontal) {
    for (let i=0; i<l; i++) {
       if (horizontal) {
 
-         if (letters[x+i][y] == word.charAt(i)) {
+         //if (letters[x+i][y] == word.charAt(i)) {
+         if (grid[x+i][y].letter == word.charAt(i)) {
             // if the letter matches, check to see if the word has already been crossed
-            let crossed_id = ids[x+i][y];
+            //let crossed_id = ids[x+i][y];
+            let crossed_id = grid[x+i][y].id1;
             let overlap = false;
             //console.log('checking for letter: ', word.charAt(i))
             //console.log('h cross found with id:', crossed_id);
@@ -225,12 +246,14 @@ function testFit(word, x, y, horizontal) {
             }
             // if it is the first or last letter, also check to see if the word is being affixed
             if (i==0) {
-               if(x>0 && ids[x-1][y] == crossed_id) {
+               //if(x>0 && ids[x-1][y] == crossed_id) {
+               if(x>0 && grid[x-1][y].id1 == crossed_id) {
                   overlap = true;
                }
             }
             if (x+l<max_x && i==l-1) {
-               if(ids[x+l][y] == crossed_id) {
+               //if(ids[x+l][y] == crossed_id) {
+               if(grid[x+l][y].id1 == crossed_id) {
                   overlap = true;
                }
             }
@@ -245,17 +268,24 @@ function testFit(word, x, y, horizontal) {
             // and save the id of the crossed word
             crossed_ids.push(crossed_id);
             //console.log('h crossed word', score);
-         } else if (ids[x+i][y] >= 0) {
+         //} else if (ids[x+i][y] >= 0) {
+         } else if (grid[x+i][y].id1 >= 0) {
             // otherwise if the square is occupied, fail the test
             score = -1;
             break;
          } else {
             // otherwise, if one of the adjacent squares are occupied also fail the test
             if (
+               /*
                (y>0 && ids[x+i][y-1] >= 0) || 
                (y<max_y-1 && ids[x+i][y+1] >= 0) ||
                (x>0 && i==0 && ids[x-1][y] >= 0) ||
-               (x+l<max_x && i==l-1 && ids[x+l][y] >= 0)
+               (x+l<max_x && i==l-1 && ids[x+l][y] >= 0)*/
+               
+               (y>0 && grid[x+i][y-1].id1 >= 0) || 
+               (y<max_y-1 && grid[x+i][y+1].id1 >= 0) ||
+               (x>0 && i==0 && grid[x-1][y].id1 >= 0) ||
+               (x+l<max_x && i==l-1 && grid[x+l][y].id1 >= 0)
                ) {
                score = -1;
                break;
@@ -264,8 +294,10 @@ function testFit(word, x, y, horizontal) {
 
       } else {
 
-         if (letters[x][y+i] == word.charAt(i)) {
-            let crossed_id = ids[x][y+i];
+         //if (letters[x][y+i] == word.charAt(i)) {
+         if (grid[x][y+i].letter == word.charAt(i)) {
+            //let crossed_id = ids[x][y+i];
+            let crossed_id = grid[x][y+i].id1;
             let overlap = false;
             //console.log('checking for letter: ', word.charAt(i))
             //console.log('v cross found with id:', crossed_id);
@@ -276,12 +308,14 @@ function testFit(word, x, y, horizontal) {
             }
             
             if (y>0 && i==0) {
-               if(ids[x][y-1] == crossed_id) {
+               //if(ids[x][y-1] == crossed_id) {
+               if(grid[x][y-1].id1 == crossed_id) {
                   overlap = true;
                }
             }
             if (y+l<max_y && i==l-1) {
-               if(ids[x][y+l] == crossed_id) {
+               //if(ids[x][y+l] == crossed_id) {
+               if(grid[x][y+l].id1 == crossed_id) {
                   overlap = true;
                }
             }
@@ -292,15 +326,22 @@ function testFit(word, x, y, horizontal) {
             score ++;
             crossed_ids.push(crossed_id);
             //console.log('v crossed word', score);
-         } else if (ids[x][y+i] >= 0) {
+         //} else if (ids[x][y+i] >= 0) {
+         } else if (grid[x][y+i].id1 >= 0) {            
             score = -1;
             break;
          } else {
             if (
+               /*
                (x>0 && ids[x-1][y+i] >= 0) || 
                (x<max_x-1 && ids[x+1][y+i] >= 0) ||
                (y>0 && i==0 && ids[x][y-1] >= 0) ||
                (y+l<max_y && i==l-1 && ids[x][y+l] >= 0)
+               */
+               (x>0 && grid[x-1][y+i].id1 >= 0) || 
+               (x<max_x-1 && grid[x+1][y+i].id1 >= 0) ||
+               (y>0 && i==0 && grid[x][y-1].id1 >= 0) ||
+               (y+l<max_y && i==l-1 && grid[x][y+l].id1 >= 0)
                ) {
                score = -1;
                break;
@@ -316,9 +357,11 @@ function testFit(word, x, y, horizontal) {
       //console.log(score);
       for (let i=0; i<l; i++) {
          if (horizontal) {
-            testfits[x+i][y] += 50;
+            //testfits[x+i][y] += 50;
+            grid[x+i][y].testfit += 50;
          } else {
-            testfits[x][y+i] += 50;
+            //testfits[x][y+i] += 50;
+            grid[x][y+i].testfit += 50;
          }
       }
    }
@@ -335,11 +378,15 @@ function addWord(word, x, y, horizontal) {
    //console.log(l);
    for (let i=0; i<l; i++) {
       if (horizontal) {
-         ids[x+i][y] = id;
-         letters[x+i][y] = word.charAt(i);
+         //ids[x+i][y] = id;
+         grid[x+i][y].id1 = id;
+         //letters[x+i][y] = word.charAt(i);
+         grid[x+i][y].letter = word.charAt(i);
       } else {
-         ids[x][y+i] = id;
-         letters[x][y+i] = word.charAt(i);
+         //ids[x][y+i] = id;
+         grid[x][y+i].id1 = id;
+         //letters[x][y+i] = word.charAt(i);
+         grid[x][y+i].letter = word.charAt(i);
       }
    }
    words.push(word);
@@ -374,7 +421,8 @@ function drawLayout() {
    noFill();
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
-         if (ids[x][y] >= 0) {
+         //if (ids[x][y] >= 0) {
+         if (grid[x][y].id1 >= 0) {
             rect(x*square_size, y*square_size, square_size, square_size);
          }
       }
@@ -385,7 +433,8 @@ function drawTestfits() {
    noStroke();
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
-         let a = testfits[x][y];
+         //let a = testfits[x][y];
+         let a = grid[x][y].testfit;
          if (a > 0) {
             fill(255,0,0,a);
             rect(x*square_size, y*square_size, square_size, square_size);
@@ -399,7 +448,8 @@ function drawWords() {
    fill(0);
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
-         text(letters[x][y], x*square_size+square_size/2, y*square_size+square_size/2);
+         //text(letters[x][y], x*square_size+square_size/2, y*square_size+square_size/2);
+         text(grid[x][y].letter, x*square_size+square_size/2, y*square_size+square_size/2);
       }
    }
 }
