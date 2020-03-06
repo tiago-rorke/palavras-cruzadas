@@ -1,32 +1,49 @@
 /*
 
+
+***** BUG *****
+
+squares have to retain up to 2 ids!
+
+***************
+
+
 REALTIME CROSSWORD-MAKING LOGIC
 
 ## 1st WORD
 
  - random location inside the grid and random rotation.
- *do later* - has maximum distance from center of grid, to put the word roughly in the middle somewhere
 
 ## SUBSEQUENT WORDS
 
  - search through all possible horizontal and vertical positions, based on word-length
    - in an array for each possible position
       - 1D array of the format [ y*width+x (horizontal pos') + (y*width+x (vertical pos') ]
-      - for each position, check if any of the letters
+      - for each position, give it a score by checking if any of the letters:
          a) overlap with an existing letter or
          b) are adjacent to an existing letter
 
-         if a) check if the letter is the same
-            - if false, position = -1 and skip to next position
-            - if true, position += 1 and keep checking remaining letters
+         if a) check if the overlapping letters are the same
+            - if false, score = -1 and skip to next position
+            - if true, 
+               - score += 1 and keep checking remaining letters
+               - save the id of the word that has been crossed
+               - if the id matches an existing saved id, the word is colinear/overlapping
+                  score = -1 and skip to next position
 
-         if b) position = -1 and skip to next position
+         if b) score = -1 and skip to next position
 
        - after checking all positions, position with highest score wins.
          - if a tie, choose randomly from highest score positions
             - if no position has a score higher than 0, word is put in random location in whitespace
 
- - if all positions are -1, word is rejected.
+ - if all position scores are -1, word is rejected.
+
+## RANDOM LOCATION IN WHITESPACE
+
+*todo* 
+- maximise distance to margins/existing words 
+   - in the case of the first word, puts it roughly in the middle somewhere
 
 */
 
@@ -103,13 +120,13 @@ function newWord() {
 
    let word = textbox.value();
    let l = word.length;
-   console.log(word);
+   console.log('new word:', word);
 
    if (words.length == 0) {
       // if this is the first word, choose a random location
       let dir = random() >= 0.5;
       //addWord(word, round(random(0,max_x-l)), round(random(0,max_y-l)), dir)
-      addWord(word, 15, 15, true)
+      addWord(word, 15, 15, false)
    } else {
       // otherwise search for a suitable location
       wordsearch(word);
@@ -123,39 +140,35 @@ function wordsearch(word) {
    let l = word.length;
    let positions = [];
 
-   console.log('starting wordsearch for word', word);
+   console.log('starting wordsearch for:', word);
    // horizontal positions
-   console.log('horizontals:');
+   //console.log('horizontals:');
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
          let score = x<=max_x-l ? testFit(word, x, y, true) : -1;
          positions[y*max_x + x] = score;
-         if(score>0)
-            console.log('h', score);
+         //if(score>0) console.log('h', score);
       }
    }
    let p = positions.length;
-   console.log('h-search done', positions.length);
+   //console.log('h-search done', positions.length);
    // vertical positions
-   console.log('verticals:');
+   //console.log('verticals:');
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
          let score = y<=max_y-l ? testFit(word, x, y, false) : -1;
          positions[p + y*max_x + x] = score;
-         if(score>0)
-            console.log('v', score);
+         //if(score>0) console.log('v', score);
       }
    }
-   console.log('v-search done', positions.length);
+   //console.log('v-search done', positions.length);
 
-   console.log('tested', positions.length, 'positions');
+   //console.log('tested', positions.length, 'positions');
    // find the best scoring positions
    let highscore = -1;
    let best_positions = [];
-   console.log('all position scores:');
    for (let i=0; i<positions.length; i++) {
       if(positions[i] >= 0)
-         console.log(positions[i]);
       if (positions[i] >= 0) {
          if (positions[i] == highscore) {
             best_positions.push(i);
@@ -166,19 +179,31 @@ function wordsearch(word) {
          }
       }
    }
-   console.log('best position score is: ', highscore);
+   //console.log('best position score is: ', highscore);
+   //console.log('total best positions: ', best_positions.length);
 
    if(highscore >= 0) {
-      addWord(word, 0, 0, true);
+      let new_position;
+      if(best_positions.length > 1) {
+         let i = round(random(0,best_positions.length));
+         new_position = best_positions[i];
+      } else {
+         new_position = best_positions[0];
+      }
+      // get new position direction and coords
+      let horizontal = new_position >= max_x*max_y ? false : true;
+      if (!horizontal) new_position -= max_x*max_y;
+      let y = floor(new_position / max_x);
+      let x = new_position % max_x;
+      addWord(word, x, y, horizontal);
    } else {
       console.log('no place found for this word, sorry');
    }
 
-
 }
 
 
-// see if a word fits at a particular location, and see how many letters match
+// see if a word fits at a particular location, and return a score based on how many letters match
 function testFit(word, x, y, horizontal) {
    let l = word.length;
    let score = 0;
@@ -191,10 +216,21 @@ function testFit(word, x, y, horizontal) {
             // if the letter matches, check to see if the word has already been crossed
             let crossed_id = ids[x+i][y];
             let overlap = false;
-            console.log('checking for letter: ', word.charAt(i))
-            console.log('h cross found with id:', crossed_id);
+            //console.log('checking for letter: ', word.charAt(i))
+            //console.log('h cross found with id:', crossed_id);
             for (let h=0; h<crossed_ids.length; h++) {
                if (crossed_ids[h] == crossed_id) {
+                  overlap = true;
+               }
+            }
+            // if it is the first or last letter, also check to see if the word is being affixed
+            if (i==0) {
+               if(x>0 && ids[x-1][y] == crossed_id) {
+                  overlap = true;
+               }
+            }
+            if (x+l<max_x && i==l-1) {
+               if(ids[x+l][y] == crossed_id) {
                   overlap = true;
                }
             }
@@ -203,18 +239,18 @@ function testFit(word, x, y, horizontal) {
                score = -1;
                break;
             }
-            console.log('overlap block');
+            //console.log('overlap block');
             // otherwise, increment the score
             score++;
             // and save the id of the crossed word
             crossed_ids.push(crossed_id);
-            console.log('h crossed word', score);
+            //console.log('h crossed word', score);
          } else if (ids[x+i][y] >= 0) {
             // otherwise if the square is occupied, fail the test
             score = -1;
             break;
          } else {
-            // otherwise, if one the adjacent squares square are occupied also fail the test
+            // otherwise, if one of the adjacent squares are occupied also fail the test
             if (
                (y>0 && ids[x+i][y-1] >= 0) || 
                (y<max_y-1 && ids[x+i][y+1] >= 0) ||
@@ -230,17 +266,32 @@ function testFit(word, x, y, horizontal) {
 
          if (letters[x][y+i] == word.charAt(i)) {
             let crossed_id = ids[x][y+i];
-            console.log('checking for letter: ', word.charAt(i))
-            console.log('v cross found with id:', crossed_id);
+            let overlap = false;
+            //console.log('checking for letter: ', word.charAt(i))
+            //console.log('v cross found with id:', crossed_id);
             for (let h=0; h<crossed_ids.length; h++) {
                if (crossed_ids[h] == crossed_id) {
-                  score = -1;
-                  break;
+                  overlap = true;
                }
+            }
+            
+            if (y>0 && i==0) {
+               if(ids[x][y-1] == crossed_id) {
+                  overlap = true;
+               }
+            }
+            if (y+l<max_y && i==l-1) {
+               if(ids[x][y+l] == crossed_id) {
+                  overlap = true;
+               }
+            }
+            if(overlap) {
+               score = -1;
+               break;
             }
             score ++;
             crossed_ids.push(crossed_id);
-            console.log('v crossed word', score);
+            //console.log('v crossed word', score);
          } else if (ids[x][y+i] >= 0) {
             score = -1;
             break;
