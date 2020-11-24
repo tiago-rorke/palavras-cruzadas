@@ -17,7 +17,7 @@ REALTIME CROSSWORD-MAKING LOGIC
 
          if a) check if the overlapping letters are the same
             - if false, score = -1 and skip to next position
-            - if true, 
+            - if true,
                - score += 1 and keep checking remaining letters
                - save the id of the word that has been crossed
                - if the id matches an existing saved id, the word is colinear/overlapping
@@ -35,73 +35,105 @@ REALTIME CROSSWORD-MAKING LOGIC
 ## RANDOM LOCATION IN WHITESPACE
 
 *todo ???*
-- maximise distance to margins/existing words 
+- maximise distance to margins/existing words
    - in the case of the first word, puts it roughly in the middle somewhere
 
 */
 
 
-let square_size = 20;
+let square_size = 30;
 let canvas_width = 700;
 let canvas_height = 500;
-let max_x;
-let max_y;
 
-let button;
-let textbox;
+// grid size
+let max_x = Math.floor(canvas_width/square_size);
+let max_y = Math.floor(canvas_height/square_size);
+
+let button_add;
+let textbox_word;
+let textbox_clue;
+let button_list;
+
+// array of word objects
+let words = [];
+
+class Word {
+   constructor(word, label, horizontal, clue) {
+      this.word = word;
+      this.solved = false;
+      // square number and direction in order to label the clue (ie: "14 down" or "12 across")
+      this.label = label;
+      this.horizontal = horizontal;
+      this.clue = clue;
+   }
+}
+
+// to increment the number label as needed.
+let label_index;
 
 // 2d array of square objects
 let grid = [];
 
-// all words added to the composition
-let words = [];
-
-class square {
+class Square {
    constructor() {
-      // word ids, empty square is -1
+      // word ids (word index in words array), empty square is -1
       // each square can be a part of up to two words
       this.id1 = -1;
       this.id2 = -1;
       // letters, empty square is ' '
       this.letter = ' ';
+      // number labels. -1 if no label.
+      this.label = -1;
       // for debugging testfit word locations
       this.testfit = 0;
    }
-
 }
 
+
+function reset() {
+
+   words = []
+   label_index = 0;
+
+   grid = [];
+   for (let x=0; x<max_x; x++) {
+      grid[x] = []
+      for (let y=0; y<max_y; y++) {
+         grid[x][y] = new Square();
+      }
+   }
+
+   console.log("new game, width =", max_x, "height =", max_y);
+}
 
 function setup() {
 
    let canvas = createCanvas(canvas_width, canvas_height);
    canvas.parent('canvas');
-   max_x = floor(canvas_width/square_size);
-   max_y = floor(canvas_height/square_size);
 
-   // init the grid
-   for (let x=0; x<max_x; x++) {
-      grid[x] = []
-      for (let y=0; y<max_y; y++) {
-         grid[x][y] = new square();        
-      }
-   }
-
-   // input
-   button = createButton('add word');
-   textbox = createInput('');
-   textbox.input(myInputEvent);
-   textbox.position(20, height + 50);
-   button.position(20, height + 100);
-   button.mousePressed(newWord);
-
-   // graphics
-   strokeWeight(2);
-   textSize(0.8*square_size);
-   textAlign(CENTER, CENTER);
-   smooth();
+   // reset the game
+   reset();
 
    // draw the empty grid
    drawGrid();
+
+   // input
+   button_add = createButton('add word');
+   textbox_word = createInput('your word');
+   textbox_word.position(20, height + 50);
+   textbox_clue = createInput('your clue');
+   textbox_clue.position(20, height + 90);
+   button_add.position(20, height + 130);
+   button_add.mousePressed(newWord);
+   button_list = createButton('print list');
+   button_list.position(20, height + 180);
+   button_list.mousePressed(printWordlist);
+
+   // graphics
+   strokeWeight(2);
+   textAlign(CENTER, CENTER);
+   smooth();
+
 }
 
 function myInputEvent() {
@@ -120,38 +152,43 @@ function draw() {
 // receive newly input word and decide what to do with it
 function newWord() {
 
-   // clear the testfit debugging array
-   for (let x=0; x<max_x; x++) {
-      for (let y=0; y<max_y; y++) {
-         grid[x][y].testfit = 0;
+   let word_string = textbox_word.value();
+   let clue_string = textbox_clue.value();
+   let l = word_string.length;
+   if (l <= 0) {
+      console.log('got an empty string...');
+   } else {
+      console.log('new word:', word_string);
+
+      // clear the testfit debugging array
+      for (let x=0; x<max_x; x++) {
+         for (let y=0; y<max_y; y++) {
+            grid[x][y].testfit = 0;
+         }
+      }
+
+      if (words.length == 0) {
+         // if this is the first word, choose a random location
+         let dir = random() >= 0.5;
+         label_index++;
+         addWord(word_string, round(random(0,max_x-l)), round(random(0,max_y-l)), dir, label_index, clue_string);
+      } else {
+         // otherwise search for a suitable location
+         wordsearch(word_string, clue_string);
       }
    }
-
-   let word = textbox.value();
-   let l = word.length;
-   console.log('new word:', word);
-
-   if (words.length == 0) {
-      // if this is the first word, choose a random location
-      let dir = random() >= 0.5;
-      addWord(word, round(random(0,max_x-l)), round(random(0,max_y-l)), dir)
-   } else {
-      // otherwise search for a suitable location
-      wordsearch(word);
-   }
-
 }
 
 
 // search the current layout for a suitable location for a new word
-function wordsearch(word) {
-   let l = word.length;
+function wordsearch(word_string, clue_string) {
+   let l = word_string.length;
    let positions = [];
 
    // horizontal positions
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
-         let score = x<=max_x-l ? testFit(word, x, y, true) : -1;
+         let score = x<=max_x-l ? testFit(word_string, x, y, true) : -1;
          positions[y*max_x + x] = score;
       }
    }
@@ -159,7 +196,7 @@ function wordsearch(word) {
    // vertical positions
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
-         let score = y<=max_y-l ? testFit(word, x, y, false) : -1;
+         let score = y<=max_y-l ? testFit(word_string, x, y, false) : -1;
          positions[p + y*max_x + x] = score;
       }
    }
@@ -195,7 +232,15 @@ function wordsearch(word) {
       if (!horizontal) new_position -= max_x*max_y;
       let y = floor(new_position / max_x);
       let x = new_position % max_x;
-      addWord(word, x, y, horizontal);
+      // check if the square already has a label, if not make a new label
+      let label;
+      if(grid[x][y].label > 0) {
+         label = grid[x][y].label;
+      } else {
+         label_index++;
+         label = label_index;
+      }
+      addWord(word_string, x, y, horizontal, label, clue_string);
    } else {
       console.log('no place found for this word, sorry');
    }
@@ -204,17 +249,17 @@ function wordsearch(word) {
 
 
 // see if a word fits at a particular location, and return a score based on how many letters match
-function testFit(word, x, y, horizontal) {
-   let l = word.length;
+function testFit(word_string, x, y, horizontal) {
+   let l = word_string.length;
    let score = 0;
    let crossed_ids = [];
 
    for (let i=0; i<l; i++) {
       // check for each letter in the new word
-      
+
       if (horizontal) {
 
-         if (grid[x+i][y].letter == word.charAt(i)) {
+         if (grid[x+i][y].letter == word_string.charAt(i)) {
             // if the letter matches, check to see if the word has already been crossed
             // first get the existing id's
             let crossed_id1 = grid[x+i][y].id1;
@@ -236,8 +281,8 @@ function testFit(word, x, y, horizontal) {
             // if it is the first or last letter, also check to see if the word is being affixed
             if (x>0 && i==0) {
                if (
-                  grid[x-1][y].id1 == crossed_id1 || 
-                  grid[x-1][y].id1 == crossed_id2 || 
+                  grid[x-1][y].id1 == crossed_id1 ||
+                  grid[x-1][y].id1 == crossed_id2 ||
                   grid[x-1][y].id2 == crossed_id1 ||
                   grid[x-1][y].id2 == crossed_id2
                   ) {
@@ -277,7 +322,7 @@ function testFit(word, x, y, horizontal) {
          } else {
             // otherwise, if one of the adjacent squares are occupied also fail the test
             if (
-               (y>0 && grid[x+i][y-1].id1 >= 0) || 
+               (y>0 && grid[x+i][y-1].id1 >= 0) ||
                (y<max_y-1 && grid[x+i][y+1].id1 >= 0) ||
                (x>0 && i==0 && grid[x-1][y].id1 >= 0) ||
                (x+l<max_x && i==l-1 && grid[x+l][y].id1 >= 0)
@@ -289,7 +334,7 @@ function testFit(word, x, y, horizontal) {
 
       } else { // (if vertical)
 
-         if (grid[x][y+i].letter == word.charAt(i)) {
+         if (grid[x][y+i].letter == word_string.charAt(i)) {
             let crossed_id1 = grid[x][y+i].id1;
             let crossed_id2 = grid[x][y+i].id2;
             if (crossed_id1 < 0) crossed_id1 = -2;
@@ -303,7 +348,7 @@ function testFit(word, x, y, horizontal) {
                   overlap = true;
                }
             }
-            
+
             if (y>0 && i==0) {
                if(
                   grid[x][y-1].id1 == crossed_id1 ||
@@ -336,13 +381,13 @@ function testFit(word, x, y, horizontal) {
                crossed_ids.push(crossed_id2);
             }
 
-         } else if (grid[x][y+i].id1 >= 0) {            
+         } else if (grid[x][y+i].id1 >= 0) {
             score = -1;
             break;
 
          } else {
             if (
-               (x>0 && grid[x-1][y+i].id1 >= 0) || 
+               (x>0 && grid[x-1][y+i].id1 >= 0) ||
                (x<max_x-1 && grid[x+1][y+i].id1 >= 0) ||
                (y>0 && i==0 && grid[x][y-1].id1 >= 0) ||
                (y+l<max_y && i==l-1 && grid[x][y+l].id1 >= 0)
@@ -372,9 +417,16 @@ function testFit(word, x, y, horizontal) {
 
 
 // add a new word at location x,y
-function addWord(word, x, y, horizontal) {
+function addWord(word_string, x, y, horizontal, label, clue_string) {
    let id = words.length;
-   let l = word.length;
+   let l = word_string.length;
+   if(grid[x][y].label <= 0){
+      grid[x][y].label = label;
+   } else {
+      if(grid[x][y].label != label) {
+         console.log("THERE IS A PROBLEM");
+      }
+   }
    for (let i=0; i<l; i++) {
       if (horizontal) {
          if (grid[x+i][y].id1 >= 0) {
@@ -382,18 +434,20 @@ function addWord(word, x, y, horizontal) {
          } else {
             grid[x+i][y].id1 = id;
          }
-         grid[x+i][y].letter = word.charAt(i);
+         grid[x+i][y].letter = word_string.charAt(i);
       } else {
          if (grid[x][y+i].id1 >= 0) {
             grid[x][y+i].id2 = id;
          } else {
             grid[x][y+i].id1 = id;
          }
-         grid[x][y+i].letter = word.charAt(i);
+         grid[x][y+i].letter = word_string.charAt(i);
       }
    }
+   word = new Word(word_string, label, horizontal, clue_string)
    words.push(word);
-   console.log('added new word. total words:', words.length);
+   console.log(label, horizontal?'across':'down',':', clue_string);
+   console.log('total words:', words.length);
    drawGrid();
 }
 
@@ -405,7 +459,7 @@ function drawGrid() {
    background(255);
    drawPoints();
    drawLayout();
-   drawTestfits();
+   // drawTestfits(); // uncommment to show all possible locations when adding a word
    drawWords();
 }
 
@@ -420,12 +474,18 @@ function drawPoints() {
 }
 
 function drawLayout() {
-   stroke(0);
-   noFill();
+   textSize(0.2*square_size);
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
          if (grid[x][y].id1 >= 0) {
+            stroke(0);
+            noFill();
             rect(x*square_size, y*square_size, square_size, square_size);
+         }
+         if (grid[x][y].label > 0) {
+            noStroke();
+            fill(0);
+            text(grid[x][y].label, x*square_size+square_size/4, y*square_size+square_size/4);
          }
       }
    }
@@ -447,9 +507,19 @@ function drawTestfits() {
 function drawWords() {
    noStroke();
    fill(0);
+   textSize(0.8*square_size);
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
-         text(grid[x][y].letter, x*square_size+square_size/2, y*square_size+square_size/2);
+         text(grid[x][y].letter, x*square_size+2*square_size/3, y*square_size+2*square_size/3);
       }
    }
+}
+
+function printWordlist() {
+   console.log("WORDLIST:");
+   for(let i=0; i<words.length; i++) {
+      console.log('[', i, ']', words[i].label, words[i].horizontal?'across':'down',':', words[i].word, ';', words[i].clue);
+   }
+   console.log("LIST END.");
+
 }
