@@ -65,6 +65,11 @@ class Word {
       this.label = label;
       this.horizontal = horizontal;
       this.clue = clue;
+
+      // new
+      this.entrytime;      // when word was added
+      this.solvedtime;     // when word was solved
+      this.solveattempts;  // number of tries at solving the clue
    }
 }
 
@@ -459,7 +464,7 @@ function drawGrid() {
    background(255);
    drawPoints();
    drawLayout();
-   // drawTestfits(); // uncommment to show all possible locations when adding a word
+   //drawTestfits(); // uncommment to show all possible locations when adding a word
    drawWords();
 }
 
