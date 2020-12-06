@@ -31,6 +31,8 @@ class Square {
       this.letter = ' ';
       // number labels. -1 if no label.
       this.label = -1;
+      // whether the letter should be drawn or not
+      this.solved = false;
    }
 }
 
@@ -84,19 +86,31 @@ module.exports = {
          for(let h=0; h<w.word.length; h++) {
             if(w.horizontal) {
                module.exports.grid[w.x + h][w.y].letter = w.word.charAt(h);
+               if(!module.exports.grid[w.x + h][w.y].solved) {
+                  module.exports.grid[w.x + h][w.y].solved = w.solved;
+               }
             } else {
                module.exports.grid[w.x][w.y + h].letter = w.word.charAt(h);
+               if(!module.exports.grid[w.x][w.y + h].solved) {
+                  module.exports.grid[w.x][w.y + h].solved = w.solved;
+               }
             }
          }
       }
    },
 
    // print the crossword to the console
-   printWords: function() {
+   printWords: function(print_unsolved) {
       for(let y=0; y<module.exports.height; y++) {
          for(let x=0; x<module.exports.width; x++) {
             process.stdout.write('|');
-            process.stdout.write(module.exports.grid[x][y].letter);
+            if(module.exports.grid[x][y].solved || print_unsolved) {
+               process.stdout.write(module.exports.grid[x][y].letter);
+            } else if (module.exports.grid[x][y].letter != ' ') {
+               process.stdout.write('_');
+            } else {
+               process.stdout.write(' ');
+            }
          }
          process.stdout.write('|');
          process.stdout.write('\n');
@@ -110,6 +124,8 @@ module.exports = {
             process.stdout.write('|');
             if(module.exports.grid[x][y].label > -1) {
                process.stdout.write(module.exports.grid[x][y].label.toString());
+            } else if (module.exports.grid[x][y].letter != ' ') {
+               process.stdout.write('_');
             } else {
                process.stdout.write(' ');
             }

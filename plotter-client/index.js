@@ -23,7 +23,7 @@ try {
 	crossword.load(game);
 	//console.log(crossword.grid);
 	//console.log(crossword.words);
-	crossword.printWords();
+	crossword.printWords(false);
    process.stdout.write('\n');
 	crossword.printLabels();
 } catch (err) {

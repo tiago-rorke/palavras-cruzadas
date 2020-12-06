@@ -58,7 +58,7 @@ let button_list;
 let words = [];
 
 class Word {
-   constructor(word, label, horizontal, clue) {
+   constructor(word, x, y, label, horizontal, clue) {
       this.word = word;
       this.solved = false;
       // square number and direction in order to label the clue (ie: "14 down" or "12 across")
@@ -67,6 +67,8 @@ class Word {
       this.clue = clue;
 
       // new
+      this.x = x;  // coordinates of first letter
+      this.y = y;
       this.entrytime;      // when word was added
       this.solvedtime;     // when word was solved
       this.solveattempts;  // number of tries at solving the clue
@@ -449,7 +451,7 @@ function addWord(word_string, x, y, horizontal, label, clue_string) {
          grid[x][y+i].letter = word_string.charAt(i);
       }
    }
-   word = new Word(word_string, label, horizontal, clue_string)
+   word = new Word(word_string, x, y, label, horizontal, clue_string)
    words.push(word);
    console.log(label, horizontal?'across':'down',':', clue_string);
    console.log('total words:', words.length);
@@ -523,7 +525,7 @@ function drawWords() {
 function printWordlist() {
    console.log("WORDLIST:");
    for(let i=0; i<words.length; i++) {
-      console.log('[', i, ']', words[i].label, words[i].horizontal?'across':'down',':', words[i].word, ';', words[i].clue);
+      console.log('[', i, ']', 'x:',words[i].x, 'y:', words[i].y, '|', words[i].label, words[i].horizontal?'across':'down',':', words[i].word, ';', words[i].clue);
    }
    console.log("LIST END.");
 

@@ -11,7 +11,7 @@
 			"y": 4,
 			"label" : 1,
 			"horizontal" : false,
-	      "solved" : false,
+	      "solved" : true,
 	      "entrytime" : 0,
 	      "solvedtime" : -1,
 	      "solveattempts" : 0
@@ -23,7 +23,7 @@
 			"y": 5,
 			"label" : 2,
 			"horizontal" : true,
-	      "solved" : false,
+	      "solved" : true,
 	      "entrytime" : 0,
 	      "solvedtime" : -1,
 	      "solveattempts" : 0
@@ -47,7 +47,7 @@
 			"y": 8,
 			"label" : 4,
 			"horizontal" : true,
-	      "solved" : false,
+	      "solved" : true,
 	      "entrytime" : 0,
 	      "solvedtime" : -1,
 	      "solveattempts" : 0
@@ -71,7 +71,7 @@
 			"y": 0,
 			"label" : 6,
 			"horizontal" : false,
-	      "solved" : false,
+	      "solved" : true,
 	      "entrytime" : 0,
 	      "solvedtime" : -1,
 	      "solveattempts" : 0
