@@ -36,103 +36,105 @@ class Square {
    }
 }
 
-
-module.exports = {
-
-   words,
-   grid,
-   width,
-   height,
-
-   init: function(w, h) {
-      module.exports.width = w;
-      module.exports.height = h;
-      module.exports.words = []
-      module.exports.grid = [];
-      for (let x=0; x<module.exports.width; x++) {
-         module.exports.grid[x] = []
-         for (let y=0; y<module.exports.height; y++) {
-            //console.log(x,y);
-            module.exports.grid[x][y] = new Square();
-         }
-      }
-   },
-
-   // initialise the words and grid arrays and fill them with the data from the json file
-   load: function(json) {
-      let game = JSON.parse(json);
-
-      // initialise
-      module.exports.init(game.grid.width, game.grid.height);
-
-      for(let i=0; i<game.words.length; i++) {
-
-         // create new word objects
-         let w = new Word(
-            game.words[i].word,
-            game.words[i].x,
-            game.words[i].y,
-            game.words[i].label,
-            game.words[i].horizontal,
-            game.words[i].clue);
-         w.solved = game.words[i].solved;
-         w.entrytime = game.words[i].entrytime;
-         w.solvedtime = game.words[i].solvedtime;
-         w.solveattempts = game.words[i].solveattempts;
-         module.exports.words.push(w);
-
-         // update the grid
-         module.exports.grid[w.x][w.y].label = w.label;
-         for(let h=0; h<w.word.length; h++) {
-            if(w.horizontal) {
-               module.exports.grid[w.x + h][w.y].letter = w.word.charAt(h);
-               if(!module.exports.grid[w.x + h][w.y].solved) {
-                  module.exports.grid[w.x + h][w.y].solved = w.solved;
-               }
-            } else {
-               module.exports.grid[w.x][w.y + h].letter = w.word.charAt(h);
-               if(!module.exports.grid[w.x][w.y + h].solved) {
-                  module.exports.grid[w.x][w.y + h].solved = w.solved;
-               }
-            }
-         }
-      }
-   },
-
-   // print the crossword to the console
-   printWords: function(print_unsolved) {
-      for(let y=0; y<module.exports.height; y++) {
-         for(let x=0; x<module.exports.width; x++) {
-            process.stdout.write('|');
-            if(module.exports.grid[x][y].solved || print_unsolved) {
-               process.stdout.write(module.exports.grid[x][y].letter);
-            } else if (module.exports.grid[x][y].letter != ' ') {
-               process.stdout.write('_');
-            } else {
-               process.stdout.write(' ');
-            }
-         }
-         process.stdout.write('|');
-         process.stdout.write('\n');
-      }
-   },
-
-   // print the crossword showing only the labels
-   printLabels: function() {
-      for(let y=0; y<module.exports.height; y++) {
-         for(let x=0; x<module.exports.width; x++) {
-            process.stdout.write('|');
-            if(module.exports.grid[x][y].label > -1) {
-               process.stdout.write(module.exports.grid[x][y].label.toString());
-            } else if (module.exports.grid[x][y].letter != ' ') {
-               process.stdout.write('_');
-            } else {
-               process.stdout.write(' ');
-            }
-         }
-         process.stdout.write('|');
-         process.stdout.write('\n');
+function init(w, h) {
+   width = w;
+   height = h;
+   words = []
+   grid = [];
+   for (let x=0; x<width; x++) {
+      grid[x] = []
+      for (let y=0; y<height; y++) {
+         //console.log(x,y);
+         grid[x][y] = new Square();
       }
    }
+}
 
-};
+// initialise the words and grid arrays and fill them with the data from the json file
+function load(json) {
+   let game = JSON.parse(json);
+
+   // initialise
+   init(game.grid.width, game.grid.height);
+
+   for(let i=0; i<game.words.length; i++) {
+
+      // create new word objects
+      let w = new Word(
+         game.words[i].word,
+         game.words[i].x,
+         game.words[i].y,
+         game.words[i].label,
+         game.words[i].horizontal,
+         game.words[i].clue);
+      w.solved = game.words[i].solved;
+      w.entrytime = game.words[i].entrytime;
+      w.solvedtime = game.words[i].solvedtime;
+      w.solveattempts = game.words[i].solveattempts;
+      words.push(w);
+
+      // update the grid
+      grid[w.x][w.y].label = w.label;
+      for(let h=0; h<w.word.length; h++) {
+         if(w.horizontal) {
+            grid[w.x + h][w.y].letter = w.word.charAt(h);
+            if(!grid[w.x + h][w.y].solved) {
+               grid[w.x + h][w.y].solved = w.solved;
+            }
+         } else {
+            grid[w.x][w.y + h].letter = w.word.charAt(h);
+            if(!grid[w.x][w.y + h].solved) {
+               grid[w.x][w.y + h].solved = w.solved;
+            }
+         }
+      }
+   }
+}
+
+// print the crossword to the console
+function printWords(print_unsolved) {
+   for(let y=0; y<height; y++) {
+      for(let x=0; x<width; x++) {
+         process.stdout.write('|');
+         if(grid[x][y].solved || print_unsolved) {
+            process.stdout.write(grid[x][y].letter);
+         } else if (grid[x][y].letter != ' ') {
+            process.stdout.write('_');
+         } else {
+            process.stdout.write(' ');
+         }
+      }
+      process.stdout.write('|');
+      process.stdout.write('\n');
+   }
+}
+
+// print the crossword showing only the labels
+function printLabels() {
+   for(let y=0; y<height; y++) {
+      for(let x=0; x<width; x++) {
+         process.stdout.write('|');
+         if(grid[x][y].label > -1) {
+            process.stdout.write(grid[x][y].label.toString());
+         } else if (grid[x][y].letter != ' ') {
+            process.stdout.write('_');
+         } else {
+            process.stdout.write(' ');
+         }
+      }
+      process.stdout.write('|');
+      process.stdout.write('\n');
+   }
+}
+
+
+// MODULE EXPORTS
+
+exports.words = words;
+exports.grid = grid;
+exports.width = width;
+exports.height = height;
+exports.init = init;
+exports.load = load;
+exports.printWords = printWords;
+exports.printLabels = printLabels;
