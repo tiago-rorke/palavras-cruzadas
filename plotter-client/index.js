@@ -18,11 +18,15 @@ const io = socketIO(server);
 const crossword = require('./crossword.js');
 
 crossword.init(3,3);
+
 try {
 	let game = fs.readFileSync('./game.json', 'utf8');
 	crossword.load(game);
 	//console.log(crossword.grid);
 	//console.log(crossword.words);
+
+	crossword.newWord("help","i'm trapped in a crossword");
+
 	crossword.printWords(false);
    process.stdout.write('\n');
 	crossword.printLabels();
