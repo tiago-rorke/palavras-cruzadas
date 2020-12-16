@@ -122,7 +122,7 @@ function setup() {
    reset();
 
    // draw the empty grid
-   drawGrid();
+   drawGame();
 
    // input
    button_add = createButton('add word');
@@ -455,14 +455,14 @@ function addWord(word_string, x, y, horizontal, label, clue_string) {
    words.push(word);
    console.log(label, horizontal?'across':'down',':', clue_string);
    console.log('total words:', words.length);
-   drawGrid();
+   drawGame();
 }
 
 
 // ---------------------- draw functions ------------------------- //
 
 
-function drawGrid() {
+function drawGame() {
    background(255);
    drawPoints();
    drawLayout();
