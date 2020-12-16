@@ -1,0 +1,142 @@
+{
+ "start_time": "",
+ "end_time": "",
+ "grid": {
+  "width": 23,
+  "height": 16
+ },
+ "words": [
+  {
+   "word": "pizza",
+   "clue": "round, flat and tasty",
+   "solved": true,
+   "label": 1,
+   "horizontal": false,
+   "x": 8,
+   "y": 4,
+   "solvedtime": -1,
+   "solveattempts": 0,
+   "entrytime": 0
+  },
+  {
+   "word": "chopsticks",
+   "clue": "two sticks that are hard to use sometimes",
+   "solved": true,
+   "label": 2,
+   "horizontal": true,
+   "x": 2,
+   "y": 5,
+   "solvedtime": -1,
+   "solveattempts": 0,
+   "entrytime": 0
+  },
+  {
+   "word": "slushy",
+   "clue": "of a wet and thick consistency",
+   "solved": false,
+   "label": 3,
+   "horizontal": false,
+   "x": 6,
+   "y": 2,
+   "solvedtime": -1,
+   "solveattempts": 0,
+   "entrytime": 0
+  },
+  {
+   "word": "facepalm",
+   "clue": "what you do when you realise it is all wrong",
+   "solved": true,
+   "label": 4,
+   "horizontal": true,
+   "x": 7,
+   "y": 8,
+   "solvedtime": -1,
+   "solveattempts": 0,
+   "entrytime": 0
+  },
+  {
+   "word": "danger",
+   "clue": "implies one should use caution",
+   "solved": false,
+   "label": 5,
+   "horizontal": false,
+   "x": 12,
+   "y": 7,
+   "solvedtime": -1,
+   "solveattempts": 0,
+   "entrytime": 0
+  },
+  {
+   "word": "fabulous",
+   "clue": "simply lovely and wonderful",
+   "solved": true,
+   "label": 6,
+   "horizontal": false,
+   "x": 4,
+   "y": 0,
+   "solvedtime": -1,
+   "solveattempts": 0,
+   "entrytime": 0
+  },
+  {
+   "word": "international",
+   "clue": "cross-border",
+   "solved": false,
+   "label": 7,
+   "horizontal": true,
+   "x": 8,
+   "y": 1,
+   "solvedtime": -1,
+   "solveattempts": 0,
+   "entrytime": 0
+  },
+  {
+   "word": "continue",
+   "clue": "to keep going from where you had stopped",
+   "solved": false,
+   "label": 2,
+   "horizontal": false,
+   "x": 2,
+   "y": 5,
+   "solvedtime": -1,
+   "solveattempts": 0,
+   "entrytime": 0
+  },
+  {
+   "word": "fool",
+   "clue": "he who is of poor judgement",
+   "solved": false,
+   "label": 6,
+   "horizontal": true,
+   "x": 4,
+   "y": 0,
+   "solvedtime": -1,
+   "solveattempts": 0,
+   "entrytime": 0
+  },
+  {
+   "word": "fuss",
+   "clue": "involving complaint and attention to detail",
+   "solved": false,
+   "label": 8,
+   "horizontal": false,
+   "x": 11,
+   "y": 3,
+   "solvedtime": -1,
+   "solveattempts": 0,
+   "entrytime": 0
+  },
+  {
+   "word": "finn",
+   "clue": "the human, friend of jake",
+   "solved": false,
+   "label": 4,
+   "horizontal": false,
+   "x": 7,
+   "y": 8,
+   "solvedtime": -1,
+   "solveattempts": 0,
+   "entrytime": 0
+  }
+ ]
+}
