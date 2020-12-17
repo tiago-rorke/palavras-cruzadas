@@ -24,12 +24,16 @@ app.get('/', function (req, res){
 });
 
 const Crossword = require('./crossword');
-
 let crossword = new Crossword(0,0);
 //crossword.init();
 
 let game_file = "./assets/game.json";
 
+const Plotter = require('./plotter');
+let plotter = new Plotter('/dev/ttyUSB0', 115200);
+
+
+// ----------------------------------------------------------------- //
 
 try {
    let game = fs.readFileSync(game_file, 'utf8');
@@ -37,6 +41,7 @@ try {
    crossword.printWords(false);
    crossword.printLabels();
    crossword.printWordlist();
+   plotter.home();
    // crossword.newWord("help","i'm trapped in a crossword");
    // crossword.save(game_file);
    // cp_socket.emit('update');
@@ -47,7 +52,7 @@ try {
 
 
 
-/// -------------------- SERVER <> CLIENT COMMS --------------------- //
+// -------------------- SERVER <> CLIENT COMMS --------------------- //
 
 
 server_socket.on('connect', () => {
@@ -67,7 +72,7 @@ server_socket.on('connect', () => {
 });
 
 
-/// ---------------- CLIENT <> CONTROL PANEL COMMS ------------------- //
+// ---------------- CLIENT <> CONTROL PANEL COMMS ------------------- //
 
 /*
 cp_socket.on('connection', (socket) => {
