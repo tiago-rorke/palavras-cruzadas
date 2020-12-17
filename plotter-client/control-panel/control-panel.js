@@ -26,6 +26,31 @@ $(function () {
       $("#status").text(data.state);
    });
 
+   let send = document.getElementById('send');
+   send.onclick = function() {
+      let gcode = [
+         "M3 S200",
+         "G90",
+         "G21",
+         "G1 F6000",
+         "G1 X100 Y100",
+         "M3 S700",
+         "G4 P0.300",
+         "G1 X100 Y200",
+         "G1 X200 Y200",
+         "G1 X200 Y100",
+         "G1 X100 Y100",
+         "M3 S200",
+         "G4 P0.300 ",
+         "G1 F10000",
+         "G1 X0 Y0"
+      ];
+      console.log('[grbl] send', gcode);
+      for (let i=0; i<gcode.length; i++) {
+         socket.emit('send', gcode[i]);
+      }
+   }
+
    // ------------ CROSSWORD------------ //
 
    let new_word = document.getElementById('new_word');

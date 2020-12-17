@@ -47,6 +47,16 @@ internal.Plotter = class {
          resolve(true);
       });
    }
+   async status() {
+      let status = await this.grbl.status();
+      return new Promise((resolve, reject) => {
+         resolve(status);
+      });
+   }
+
+   send(gcode) {
+      this.grbl.command(gcode);
+   }
 }
 /*		await this.grbl.killAlarmLock()
 		await this.grbl.metricCoordinates()

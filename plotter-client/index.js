@@ -74,25 +74,11 @@ server_socket.on('connect', () => {
 
 // ---------------- CLIENT <> CONTROL PANEL COMMS ------------------- //
 
-/*
+
 cp_socket.on('connection', (socket) => {
    console.log('control panel connected');
 
-   socket.on('get_status', async () => {
-      console.log('get_status');
-      let status = await grbl.status();
-      socket.emit('status', status);
-   });
-
-   socket.on('unlock', async () => {
-      console.log('unlock');
-      await grbl.killAlarmLock();
-   });
-
-   socket.on('home', async () => {
-      console.log('home');
-      await grbl.runHomingCycle();
-   });
+   // ------------------- CROSSWORD ---------------------- //
 
    socket.on('update', () => {
       console.log('update');
@@ -112,5 +98,26 @@ cp_socket.on('connection', (socket) => {
       }
 
    });
+
+   // ---------------------- GBRL ----------------------- //
+
+   socket.on('get_status', async () => {
+      console.log('get_status');
+      socket.emit('status', await plotter.status());
+   });
+
+   socket.on('home', async () => {
+      console.log('home');
+      await plotter.home();
+   });
+
+   socket.on('unlock', async () => {
+      console.log('unlock');
+      await plotter.unlock();
+   });
+
+   socket.on('send', (gcode) => {
+      plotter.send(gcode);
+   });
+
 });
-*/
