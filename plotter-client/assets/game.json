@@ -1,6 +1,6 @@
 {
- "start_time": "",
- "end_time": "",
+ "start_time": "2020-12-11 23:16:13:870",
+ "end_time": "2020-12-11 23:16:13:870",
  "grid": {
   "width": 23,
   "height": 16
@@ -19,124 +19,70 @@
    "entrytime": 0
   },
   {
-   "word": "chopsticks",
-   "clue": "two sticks that are hard to use sometimes",
+   "word": "PASTA",
+   "clue": "i can't believe it's not pizza!",
    "solved": true,
    "label": 2,
    "horizontal": true,
-   "x": 2,
-   "y": 5,
-   "solvedtime": -1,
-   "solveattempts": 0,
-   "entrytime": 0
+   "x": 0,
+   "y": 0,
+   "solvedtime": "2020-12-16 01:37:43:282",
+   "solveattempts": 0
   },
   {
-   "word": "slushy",
-   "clue": "of a wet and thick consistency",
+   "word": "SATURDAY",
+   "clue": "it's caturday!",
+   "solved": false,
+   "label": 2,
+   "horizontal": true,
+   "x": 0,
+   "y": 0,
+   "solvedtime": -1,
+   "solveattempts": 0
+  },
+  {
+   "word": "CURTIR",
+   "clue": "e passar bons tempos",
    "solved": false,
    "label": 3,
-   "horizontal": false,
-   "x": 6,
-   "y": 2,
-   "solvedtime": -1,
-   "solveattempts": 0,
-   "entrytime": 0
-  },
-  {
-   "word": "facepalm",
-   "clue": "what you do when you realise it is all wrong",
-   "solved": true,
-   "label": 4,
    "horizontal": true,
-   "x": 7,
-   "y": 8,
-   "solvedtime": -1,
-   "solveattempts": 0,
-   "entrytime": 0
-  },
-  {
-   "word": "danger",
-   "clue": "implies one should use caution",
-   "solved": false,
-   "label": 5,
-   "horizontal": false,
-   "x": 12,
-   "y": 7,
-   "solvedtime": -1,
-   "solveattempts": 0,
-   "entrytime": 0
-  },
-  {
-   "word": "fabulous",
-   "clue": "simply lovely and wonderful",
-   "solved": true,
-   "label": 6,
-   "horizontal": false,
-   "x": 4,
+   "x": 2,
    "y": 0,
    "solvedtime": -1,
-   "solveattempts": 0,
-   "entrytime": 0
+   "solveattempts": 0
   },
   {
-   "word": "international",
-   "clue": "cross-border",
+   "word": "TESTAR",
+   "clue": "ver se funciona",
    "solved": false,
-   "label": 7,
+   "label": 3,
    "horizontal": true,
-   "x": 8,
-   "y": 1,
+   "x": 2,
+   "y": 0,
    "solvedtime": -1,
-   "solveattempts": 0,
-   "entrytime": 0
+   "solveattempts": 0
   },
   {
-   "word": "continue",
-   "clue": "to keep going from where you had stopped",
+   "word": "FUNKE",
+   "clue": "baile brasileiro",
    "solved": false,
    "label": 2,
-   "horizontal": false,
-   "x": 2,
-   "y": 5,
-   "solvedtime": -1,
-   "solveattempts": 0,
-   "entrytime": 0
-  },
-  {
-   "word": "fool",
-   "clue": "he who is of poor judgement",
-   "solved": false,
-   "label": 6,
    "horizontal": true,
-   "x": 4,
+   "x": 0,
    "y": 0,
    "solvedtime": -1,
-   "solveattempts": 0,
-   "entrytime": 0
+   "solveattempts": 0
   },
   {
-   "word": "fuss",
-   "clue": "involving complaint and attention to detail",
-   "solved": false,
-   "label": 8,
-   "horizontal": false,
-   "x": 11,
-   "y": 3,
-   "solvedtime": -1,
-   "solveattempts": 0,
-   "entrytime": 0
-  },
-  {
-   "word": "finn",
-   "clue": "the human, friend of jake",
+   "word": "INVISIVEL",
+   "clue": "quando nenguem consegue ver a cena",
    "solved": false,
    "label": 4,
-   "horizontal": false,
-   "x": 7,
-   "y": 8,
+   "horizontal": true,
+   "x": 9,
+   "y": 0,
    "solvedtime": -1,
-   "solveattempts": 0,
-   "entrytime": 0
+   "solveattempts": 0
   }
  ]
 }

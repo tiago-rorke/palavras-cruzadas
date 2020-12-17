@@ -11,7 +11,9 @@
   "dependencies": {
     "express": "^4.17.1",
     "grbl-stream": "0.0.1",
+    "node-fetch": "^2.6.1",
     "serialport": "^9.0.2",
-    "socket.io": "^3.0.3"
+    "socket.io": "^3.0.3",
+    "socket.io-client": "^3.0.4"
   }
 }

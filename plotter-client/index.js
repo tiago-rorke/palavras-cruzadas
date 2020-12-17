@@ -1,18 +1,20 @@
+"use strict";
 
 const fs = require('fs');
 const express = require('express');
+const fetch = require('node-fetch');
 const socketIO = require('socket.io');
+const socketIO_client = require('socket.io-client');
 
-const SerialPort = require('serialport')
-const { GrblStream } = require('grbl-stream')
+// websockets connection to server (heroku app)
+const server_url = "http://localhost:3000";
+const server_socket = socketIO_client.connect(server_url);
 
-//const port = new SerialPort('/dev/ttyUSB0', { baudRate: 115200})
-//const grbl = new GrblStream()
-
+// websockets connection to control panel
 const app = express();
 const cp_server = app.listen(3001, () => console.log(`Listening on 3001`));
 const cp_socket = socketIO(cp_server);
-//const server_socket = socketIO(<heroku server>);
+
 
 //app.use(express.static('/'));
 app.use("/", express.static(__dirname + '/control-panel/'));
@@ -23,15 +25,51 @@ app.get('/', function (req, res){
 
 const Crossword = require('./crossword');
 
-crossword = new Crossword(3,3);
+let crossword = new Crossword(0,0);
 //crossword.init();
 
 let game_file = "./assets/game.json";
 
-// grbl.pipe(port).pipe(grbl)
-//    .on('command', cmd => console.log('>', cmd))
-//    .on('message', msg => console.log('<', msg))
 
+try {
+   let game = fs.readFileSync(game_file, 'utf8');
+   crossword.load(game);
+   crossword.printWords(false);
+   crossword.printLabels();
+   crossword.printWordlist();
+   // crossword.newWord("help","i'm trapped in a crossword");
+   // crossword.save(game_file);
+   // cp_socket.emit('update');
+   //process.stdout.write('\n');
+} catch (err) {
+   console.log(err);
+}
+
+
+
+/// -------------------- SERVER <> CLIENT COMMS --------------------- //
+
+
+server_socket.on('connect', () => {
+   console.log('connected to server');
+
+   server_socket.on("fileChanged", () => {
+      fetch(server_url + "/game.json")
+      .then((res) => res.json())
+      .then((out) => {
+         fs.writeFileSync(game_file, JSON.stringify(out,null,1));
+      })
+      .catch((err) => {
+         console.log(err);
+      });
+      crossword.load(game_file);
+   });
+});
+
+
+/// ---------------- CLIENT <> CONTROL PANEL COMMS ------------------- //
+
+/*
 cp_socket.on('connection', (socket) => {
    console.log('control panel connected');
 
@@ -58,8 +96,9 @@ cp_socket.on('connection', (socket) => {
 
    socket.on('new_word', (word, clue) => {
       console.log('adding new word: ', word + '; ' + clue)
-      if(crossword.newWord(word,clue) != false) {
-         console.log('failed to add new word');
+      let w = crossword.newWord(word,clue)
+      if(w != false) {
+         console.log(w);
          crossword.save(game_file);
          cp_socket.emit('update');
       } else {
@@ -68,59 +107,5 @@ cp_socket.on('connection', (socket) => {
       }
 
    });
-
 });
-
-
-try {
-   let game = fs.readFileSync(game_file, 'utf8');
-   crossword.load(game);
-   crossword.printWords(false);
-   crossword.printLabels();
-   crossword.printWordlist();
-   // crossword.newWord("help","i'm trapped in a crossword");
-   // crossword.save(game_file);
-   // cp_socket.emit('update');
-   //process.stdout.write('\n');
-} catch (err) {
-   console.log(err);
-}
-
-
-// grbl.command('?');
-// grbl.command('$$');
-
-/*
-console.log('status', await grbl.status())
-console.log('help', await grbl.help())
-console.log('settings', await grbl.settings())
-
-await grbl.runHomingCycle()
-await grbl.killAlarmLock()
-await grbl.metricCoordinates()
-await grbl.incrementalPositioning()
-await grbl.position({ x: -100, y: -100 })
 */
-
-
-/// -------------------- SERVER <> CLIENT COMMS --------------------- //
-
-
-/*// when we know the gamefile has changed...:
-server_socket.on("update", () => {
-   nome_lista = "/assets/game.json";
-   fetch("/" + nome_lista)
-   .then((res) => res.json())
-   .then((out) => {
-      out.words.forEach((word) => {
-         if (word.solved === true) {
-
-         } else {
-
-         }
-      });
-   })
-   .catch((err) => {
-      throw err;
-   });
-});*/
