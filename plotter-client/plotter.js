@@ -3,6 +3,15 @@
 const SerialPort = require('serialport')
 const { GrblStream } = require('grbl-stream')
 
+// default parameters
+const default_travel_speed = 8000;
+const default_draw_speed = 4000;
+const default_up_delay = 300;
+const default_down_delay = 300;
+const default_up_pos = 200;
+const default_down_pos = 700;
+
+
 
 // grbl.command('?');
 // grbl.command('$$');
@@ -30,6 +39,13 @@ internal.Plotter = class {
    	this.port = new SerialPort(port, { baudRate: baud})
 		this.grbl = new GrblStream()
 
+      this.travel_speed = default_travel_speed;
+      this.draw_speed = default_draw_speed;
+      this.up_delay = default_up_delay;
+      this.down_delay = default_down_delay;
+      this.up_pos = default_up_pos;
+      this.down_pos = default_down_pos;
+
 		this.grbl.pipe(this.port).pipe(this.grbl)
 		   .on('command', cmd => console.log('>', cmd))
 		   .on('message', msg => console.log('<', msg))
@@ -54,14 +70,19 @@ internal.Plotter = class {
       });
    }
 
-   send(gcode) {
-      this.grbl.command(gcode);
+   async send(gcode) {
+      await this.grbl.command(gcode);
+      return new Promise((resolve, reject) => {
+         resolve(true);
+      });
    }
 }
-/*		await this.grbl.killAlarmLock()
-		await this.grbl.metricCoordinates()
-		await this.grbl.incrementalPositioning()
-		await this.grbl.position({ x: -100, y: -100 })*/
+   /*
+   await this.grbl.killAlarmLock()
+  	await this.grbl.metricCoordinates()
+	await this.grbl.incrementalPositioning()
+	await this.grbl.position({ x: -100, y: -100 })
+   */
 
 // ====================================================== //
 

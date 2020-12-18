@@ -30,7 +30,8 @@ let crossword = new Crossword(0,0);
 let game_file = "./assets/game.json";
 
 const Plotter = require('./plotter');
-let plotter = new Plotter('/dev/ttyUSB0', 115200);
+//let plotter = new Plotter('/dev/ttyUSB0', 115200);
+let plotter = new Plotter('/dev/ttyACM0', 115200);
 
 
 // ----------------------------------------------------------------- //
@@ -38,10 +39,10 @@ let plotter = new Plotter('/dev/ttyUSB0', 115200);
 try {
    let game = fs.readFileSync(game_file, 'utf8');
    crossword.load(game);
-   crossword.printWords(false);
-   crossword.printLabels();
-   crossword.printWordlist();
-   plotter.home();
+   // crossword.printWords(false);
+   // crossword.printLabels();
+   // crossword.printWordlist();
+   // plotter.home();
    // crossword.newWord("help","i'm trapped in a crossword");
    // crossword.save(game_file);
    // cp_socket.emit('update');
@@ -116,8 +117,40 @@ cp_socket.on('connection', (socket) => {
       await plotter.unlock();
    });
 
-   socket.on('send', (gcode) => {
-      plotter.send(gcode);
+   socket.on('send', async (gcode) => {
+      for (let i=0; i<gcode.length; i++) {
+         await plotter.send(gcode[i]);
+      }
+   });
+
+   socket.on('set_config', (config) => {
+      plotter.travel_speed = config.travel_speed;
+      plotter.draw_speed   = config.draw_speed;
+      plotter.up_pos       = config.up_pos;
+      plotter.down_pos     = config.down_pos;
+      plotter.up_delay     = config.up_delay;
+      plotter.down_delay   = config.down_delay;
+
+      /*
+      console.log("travel_speed:", plotter.travel_speed);
+      console.log("draw_speed:", plotter.draw_speed);
+      console.log("up_pos:", plotter.up_pos);
+      console.log("down_pos:", plotter.down_pos);
+      console.log("up_delay:", plotter.up_delay);
+      console.log("down_delay:", plotter.down_delay);
+      */
+   });
+
+   socket.on('get_config', () => {
+      console.log("get_config");
+      socket.emit('get_config', {
+         travel_speed: plotter.travel_speed,
+         draw_speed:   plotter.draw_speed,
+         up_pos:       plotter.up_pos,
+         down_pos:     plotter.down_pos,
+         up_delay:     plotter.up_delay,
+         down_delay:   plotter.down_delay
+      });
    });
 
 });
