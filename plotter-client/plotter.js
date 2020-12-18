@@ -11,22 +11,11 @@ const default_down_delay = 300;
 const default_up_pos = 200;
 const default_down_pos = 700;
 
-
-
-// grbl.command('?');
-// grbl.command('$$');
-
 /*
-console.log('status', await grbl.status())
 console.log('help', await grbl.help())
 console.log('settings', await grbl.settings())
-
-await grbl.runHomingCycle()
-await grbl.killAlarmLock()
-await grbl.metricCoordinates()
-await grbl.incrementalPositioning()
-await grbl.position({ x: -100, y: -100 })
 */
+
 
 
 // ========================== PLOTTER CLASS =============================== //
@@ -45,6 +34,10 @@ internal.Plotter = class {
       this.down_delay = default_down_delay;
       this.up_pos = default_up_pos;
       this.down_pos = default_down_pos;
+
+      this.draw_log = [];
+      this.drawing = false;
+      this.init();
 
 		this.grbl.pipe(this.port).pipe(this.grbl)
 		   .on('command', cmd => console.log('>', cmd))
@@ -76,13 +69,41 @@ internal.Plotter = class {
          resolve(true);
       });
    }
+
+   async init() {
+      await this.grbl.metricCoordinates();
+      await this.grbl.absolutePositioning();
+      await this.send("M3 S" + this.up_pos);
+   }
+
+   async beginDraw(x, y) {
+      this.vertex(x,y);
+      await this.send("M3 S" + this.down_pos);
+      await this.send("G4 P" + this.down_delay/1000);
+      this.drawing = true;
+   }
+
+   async endDraw() {
+      await this.send("M3 S" + this.up_pos);
+      await this.send("G4 P" + this.up_delay/1000);
+      this.drawing = false;
+   }
+
+   async vertex(x, y) {
+      this.draw_log.push({
+         x: x,
+         y: y,
+         drawing: this.drawing
+      });
+      if (this.drawing) {
+         await this.send("G1 X" + x + " Y" + y + " F" + this.draw_speed);
+         //await this.send("G1 F" + this.draw_speed);
+         //await this.grbl.position({ x: x, y: y })
+      } else {
+         await this.send("G1 X" + x + " Y" + y + " F" + this.travel_speed);
+      }
+   }
 }
-   /*
-   await this.grbl.killAlarmLock()
-  	await this.grbl.metricCoordinates()
-	await this.grbl.incrementalPositioning()
-	await this.grbl.position({ x: -100, y: -100 })
-   */
 
 // ====================================================== //
 

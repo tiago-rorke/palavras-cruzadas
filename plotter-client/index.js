@@ -33,6 +33,8 @@ const Plotter = require('./plotter');
 //let plotter = new Plotter('/dev/ttyUSB0', 115200);
 let plotter = new Plotter('/dev/ttyACM0', 115200);
 
+const codefont = require('./codefont');
+
 
 // ----------------------------------------------------------------- //
 
@@ -73,7 +75,7 @@ server_socket.on('connect', () => {
 });
 
 
-// ---------------- CLIENT <> CONTROL PANEL COMMS ------------------- //
+// ---------------- CLIENT <> CONTROL PANEL COMMS ------------------ //
 
 
 cp_socket.on('connection', (socket) => {
@@ -104,7 +106,9 @@ cp_socket.on('connection', (socket) => {
 
    socket.on('get_status', async () => {
       console.log('get_status');
-      socket.emit('status', await plotter.status());
+      let stat = await plotter.status();
+      console.log(stat);
+      socket.emit('status', stat);
    });
 
    socket.on('home', async () => {
@@ -153,4 +157,73 @@ cp_socket.on('connection', (socket) => {
       });
    });
 
+   socket.on('test', async () => {
+      console.log('test routine');
+      await plotter.beginDraw(0,0);
+      await plotter.vertex(0,10);
+      await plotter.vertex(10,10);
+      await plotter.vertex(10,0);
+      await plotter.vertex(0,0);
+      await plotter.endDraw();
+      console.log(plotter.draw_log);
+   });
+
 });
+
+
+// ---------------------------- DRAWING ---------------------------- //
+
+
+function drawChar(index, x, y, scale) {
+
+   let line = false;
+
+   for (let h=0; h<11; h++) {
+
+      if(codefont[index][0][h] > -1 && !line) {
+         plotter.beginDraw();
+         line = true;
+      }
+
+      if(h>0 && codefont[index][0][h] < 0 && line) {
+         plotter.endDraw();
+         line = false;
+      }
+
+      if(codefont[index][0][h] > -1) {
+         let vx = codefont[index][0][h] * scale + x;
+         let vy = codefont[index][1][h] * -scale + y;
+         plotter.vertex(vx, vy);
+      }
+
+      if(h==10) {
+         plotter.endDraw();
+         line = false;
+      }
+   }
+}
+
+/*
+function drawAlphabet(float x, float y, float fontScale) {
+   for (int i=0; i<94; i++) {
+      drawChar(i, x, y, fontScale);
+      x += fontScale * 3;
+   }
+}
+
+void drawScaledAlphabets(float x, float y) {
+   drawAlphabet(x, y+30, 2);
+   drawAlphabet(x, y+72, 1.5);
+   drawAlphabet(x, y+105, 1);
+   drawAlphabet(x, y+130, 0.75);
+   drawAlphabet(x, y+152, 0.6);
+   drawAlphabet(x, y+170, 0.45);
+}
+
+void drawText(float x, float y, String text, float textSize) {
+   for(int i=0; i<text.length(); i++) {
+      drawChar((int)text.charAt(i)-32, x, y, textSize/5);
+      x += (3*textSize/5)*1.15;
+   }
+}
+*/

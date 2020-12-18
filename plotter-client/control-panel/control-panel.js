@@ -1,3 +1,5 @@
+"use strict";
+
 let travel_speed = 2000;
 let draw_speed = 4000;
 let up_pos = 200;
@@ -108,6 +110,17 @@ $(function () {
          up_delay:     up_delay,
          down_delay:   down_delay
       });
+   }
+
+   socket.on('update_draw_log', (draw_log) => {
+      console.log('[grbl] update draw log');
+      console.log(draw_log);
+   });
+
+   let test = document.getElementById('test');
+   test.onclick = () => {
+      console.log('[grbl] test');
+      socket.emit('test');
    }
 
    // ------------ CROSSWORD------------ //

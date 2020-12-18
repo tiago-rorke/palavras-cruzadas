@@ -137,17 +137,6 @@
    "solvedtime": -1,
    "solveattempts": 0,
    "entrytime": 0
-  },
-  {
-   "word": "plumbis",
-   "clue": "how is it made?",
-   "solved": false,
-   "label": 9,
-   "horizontal": true,
-   "x": 0,
-   "y": 2,
-   "solvedtime": -1,
-   "solveattempts": 0
   }
  ]
 }
