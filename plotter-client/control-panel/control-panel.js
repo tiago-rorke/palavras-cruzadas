@@ -41,6 +41,11 @@ $(function () {
       console.log('[grbl] home');
       socket.emit('home');
    }
+   let play = document.getElementById('play');
+   play.onclick = () => {
+      console.log('[grbl] play');
+      socket.emit('play');
+   }
    let feed_hold = document.getElementById('feed_hold');
    feed_hold.onclick = () => {
       console.log('[grbl] feed hold');
@@ -175,10 +180,18 @@ $(function () {
       plotter_render.update(draw_buffer, draw_log);
    });
 
-   let test = document.getElementById('test');
-   test.onclick = () => {
-      console.log('[grbl] test');
-      socket.emit('test');
+   let clear = document.getElementById('clear');
+   clear.onclick = () => {
+      console.log('clear drawing');
+      socket.emit('clear');
+   }
+   let draw = document.getElementById('draw');
+   draw.onclick = () => {
+      let t = document.getElementById('draw_text').value
+      let h = document.getElementById('text_height').value
+      let s = document.getElementById('text_spacing').value
+      console.log('draw text');
+      socket.emit('draw', t, h, s);
    }
 
    // ------------ CROSSWORD------------ //

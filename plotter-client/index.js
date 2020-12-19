@@ -121,6 +121,11 @@ cp_socket.on('connection', (socket) => {
       await plotter.unlock();
    });
 
+   socket.on('play', async () => {
+      console.log('draw from buffer');
+      await draw_from_buffer();
+   });
+
    socket.on('feed_hold', async () => {
       console.log('feed_hold');
       await plotter.feedHold();
@@ -167,8 +172,14 @@ cp_socket.on('connection', (socket) => {
       });
    });
 
-   socket.on('test', async () => {
-      console.log('test routine');
+   socket.on('clear', () => {
+      console.log("clear drawing");
+      plotter.draw_buffer = [];
+      plotter.draw_log = [];
+      update_plotter_render();
+   });
+   socket.on('draw', async (text, text_height, text_spacing) => {
+      console.log('draw to buffer');
       /*
       plotter.beginDraw();
       plotter.vertex(10,10);
@@ -186,9 +197,9 @@ cp_socket.on('connection', (socket) => {
       plotter.endDraw();
       */
       //drawChar('H', 100, 100, 10);
-      drawText('HELLO MY NAME IS MIMI', 20, 20, 5, 0.15);
+      //drawText('HELLO MY NAME IS MIMI', 20, 20, 5, 0.15);
+      drawText(text, 20, 20, text_height, text_spacing);
       update_plotter_render();
-      await draw_from_buffer();
       //console.log(plotter.draw_log);
    });
 
@@ -256,7 +267,7 @@ function drawChar(char, x, y, scale) {
 function drawText(text, x, y, scale, spacing) {
    for(let i=0; i<text.length; i++) {
       drawChar(text.charAt(i), x, y, scale);
-      x += (3*scale)*(1 + spacing);
+      x += (3*scale)*(1 + Number(spacing));
    }
 }
 
