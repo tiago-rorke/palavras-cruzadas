@@ -41,42 +41,99 @@ $(function () {
       console.log('[grbl] home');
       socket.emit('home');
    }
-
+   let feed_hold = document.getElementById('feed_hold');
+   feed_hold.onclick = () => {
+      console.log('[grbl] feed hold');
+      socket.emit('feed_hold');
+   }
+   let resume = document.getElementById('resume');
+   resume.onclick = () => {
+      console.log('[grbl] resume');
+      socket.emit('resume');
+   }
 
    let send = document.getElementById('send');
    send.onclick = () => {
-      /*
-      let gcode = [
-      "M3 S200",
-      "G90",
-      "G21",
-      "G1 F6000",
-      "G1 X100 Y100",
-      "M3 S700",
-      "G4 P0.300",
-      "G1 X100 Y200",
-      "G1 X200 Y200",
-      "G1 X200 Y100",
-      "G1 X100 Y100",
-      "M3 S200",
-      "G4 P0.300 ",
-      "G1 F10000",
-      "G1 X0 Y0"
-      ];
-      */
       let gcode = [document.getElementById('gcode').value];
       console.log('[grbl] send', gcode);
       socket.emit('send', gcode);
    }
 
+   let left_up = document.getElementById('X-_Y+');
+   left_up.onclick = () => {
+      let d = document.getElementById('jog_dist').value
+      let gcode = ['G91','G0 X-' + d + ' Y' + d];
+      console.log('[grbl] jog', gcode);
+      socket.emit('send', gcode);
+   }
+   let up = document.getElementById('Y+');
+   up.onclick = () => {
+      let d = document.getElementById('jog_dist').value
+      let gcode = ['G91','G0 Y' + d];
+      console.log('[grbl] jog', gcode);
+      socket.emit('send', gcode);
+   }
+   let right_up = document.getElementById('X+_Y+');
+   right_up.onclick = () => {
+      let d = document.getElementById('jog_dist').value
+      let gcode = ['G91','G0 X' + d + ' Y' + d];
+      console.log('[grbl] jog', gcode);
+      socket.emit('send', gcode);
+   }
+   let left = document.getElementById('X-');
+   left.onclick = () => {
+      let d = document.getElementById('jog_dist').value
+      let gcode = ['G91','G0 X-' + d];
+      console.log('[grbl] jog', gcode);
+      socket.emit('send', gcode);
+   }
+   let right = document.getElementById('X+');
+   right.onclick = () => {
+      let d = document.getElementById('jog_dist').value
+      let gcode = ['G91','G0 X' + d];
+      console.log('[grbl] jog', gcode);
+      socket.emit('send', gcode);
+   }
+   let left_down = document.getElementById('X-_Y-');
+   left_down.onclick = () => {
+      let d = document.getElementById('jog_dist').value
+      let gcode = ['G91','G0 X-' + d + ' Y-' + d];
+      console.log('[grbl] jog', gcode);
+      socket.emit('send', gcode);
+   }
+   let down = document.getElementById('Y-');
+   down.onclick = () => {
+      let d = document.getElementById('jog_dist').value
+      let gcode = ['G91','G0 Y-' + d];
+      console.log('[grbl] jog', gcode);
+      socket.emit('send', gcode);
+   }
+   let right_down = document.getElementById('X+_Y-');
+   right_down.onclick = () => {
+      let d = document.getElementById('jog_dist').value
+      let gcode = ['G91','G0 X' + d + ' Y-' + d];
+      console.log('[grbl] jog', gcode);
+      socket.emit('send', gcode);
+   }
+   let set_zero = document.getElementById('set_zero');
+   set_zero.onclick = () => {
+      let gcode = ['G10 P1 L20 X0 Y0'];
+      console.log('[grbl] set work zero', gcode);
+      socket.emit('send', gcode);
+   }
+   let to_zero = document.getElementById('X0_Y0');
+   to_zero.onclick = () => {
+      let gcode = ['G90','G0 X0 Y0'];
+      console.log('[grbl] go to work zero', gcode);
+      socket.emit('send', gcode);
+   }
 
-   /*
    let get_config = document.getElementById('get_config');
    get_config.onclick = () => {
       console.log('[grbl] get config');
       socket.emit('get_config');
    }
-   */
+
    socket.on('get_config', (config) => {
       console.log('got config');
       travel_speed = config.travel_speed;

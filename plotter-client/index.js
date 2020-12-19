@@ -121,6 +121,16 @@ cp_socket.on('connection', (socket) => {
       await plotter.unlock();
    });
 
+   socket.on('feed_hold', async () => {
+      console.log('feed_hold');
+      await plotter.feedHold();
+   });
+
+   socket.on('resume', async () => {
+      console.log('resume');
+      await plotter.resume();
+   });
+
    socket.on('send', async (gcode) => {
       for (let i=0; i<gcode.length; i++) {
          await plotter.send(gcode[i]);

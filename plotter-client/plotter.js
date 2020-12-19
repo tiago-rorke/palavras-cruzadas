@@ -72,6 +72,14 @@ internal.Plotter = class {
       });
    }
 
+   feedHold(gcode) {
+      this.grbl.command('!');
+   }
+
+   resume(gcode) {
+      this.grbl.command('~');
+   }
+
    async init() {
       await this.grbl.metricCoordinates();
       await this.grbl.absolutePositioning();
