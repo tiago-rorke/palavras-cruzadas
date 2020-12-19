@@ -78,7 +78,7 @@ $(function () {
    }
    */
    socket.on('get_config', (config) => {
-      console.log('[grbl] got config');
+      console.log('got config');
       travel_speed = config.travel_speed;
       draw_speed   = config.draw_speed;
       up_pos       = config.up_pos;
@@ -101,7 +101,7 @@ $(function () {
       down_pos     = document.getElementById('down_pos').value;
       up_delay     = document.getElementById('up_delay').value;
       down_delay   = document.getElementById('down_delay').value;
-      console.log('[grbl] set_config');
+      console.log('set_config');
       socket.emit('set_config', {
          travel_speed: travel_speed,
          draw_speed:   draw_speed,
@@ -112,9 +112,10 @@ $(function () {
       });
    }
 
-   socket.on('update_draw_log', (draw_log) => {
-      console.log('[grbl] update draw log');
-      console.log(draw_log);
+   socket.on('update_drawing', (draw_buffer, draw_log) => {
+      console.log('update drawing');
+      //console.log(draw_log);
+      plotter_render.update(draw_buffer, draw_log);
    });
 
    let test = document.getElementById('test');
@@ -133,11 +134,11 @@ $(function () {
 
    let update_button = document.getElementById('update');
    update_button.onclick = () => {
-      update();
+      update_crossword();
    }
 
    socket.on("update", () => {
-      update();
+      update_crossword();
    });
 
    socket.on("new_word_fail", () => {
@@ -157,7 +158,7 @@ function update_crossword() {
       // });
       init(out.grid.width, out.grid.height);
       load(out);
-      drawGame();
+      crossword_render.update();
       //printWordlist();
       console.log('updated');
    })

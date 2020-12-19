@@ -1,89 +1,91 @@
 
 
-
 // ---------------------- p5.js ------------------------- //
 
-let square_size = 30;
-let canvas_width = 700;
-let canvas_height = 500;
+const crossword_p5 = (s) => {
 
-// grid size
-let max_x = Math.floor(canvas_width/square_size);
-let max_y = Math.floor(canvas_height/square_size);
+   let square_size = 30;
+   let canvas_width = 700;
+   let canvas_height = 500;
 
-function setup() {
+   // grid size
+   let max_x = Math.floor(canvas_width/square_size);
+   let max_y = Math.floor(canvas_height/square_size);
 
-   let canvas = createCanvas(canvas_width, canvas_height);
-   canvas.parent('canvas');
+   s.setup = () => {
 
-   // graphics
-   strokeWeight(2);
-   textAlign(CENTER, CENTER);
-   smooth();
-}
+      let canvas = s.createCanvas(canvas_width, canvas_height);
+      canvas.parent('crossword_canvas');
 
-// ---------------------- draw functions ------------------------- //
-
-
-function drawGame() {
-   background(255);
-   drawPoints();
-   drawLayout();
-   //drawTestfits(); // uncommment to show all possible locations when adding a word
-   drawWords();
-}
-
-function drawPoints() {
-   stroke(0);
-   noFill();
-   for (let x=0; x<=max_x; x++) {
-      for (let y=0; y<=max_y; y++) {
-         point(x*square_size, y*square_size);
-      }
+      // graphics
+      s.strokeWeight(2);
+      s.textAlign(s.CENTER, s.CENTER);
+      s.smooth();
    }
-}
 
-function drawLayout() {
-   textSize(0.2*square_size);
-   for (let x=0; x<max_x; x++) {
-      for (let y=0; y<max_y; y++) {
-         if (grid[x][y].id1 >= 0) {
-            stroke(0);
-            noFill();
-            rect(x*square_size, y*square_size, square_size, square_size);
-         }
-         if (grid[x][y].label > 0) {
-            noStroke();
-            fill(0);
-            text(grid[x][y].label, x*square_size+square_size/4, y*square_size+square_size/4);
+   s.update = () => {
+      s.background(255);
+      s.drawPoints();
+      s.drawLayout();
+      //drawTestfits(); // uncommment to show all possible locations when adding a word
+      s.drawWords();
+   }
+
+   s.drawPoints = () => {
+      s.stroke(0);
+      s.noFill();
+      for (let x=0; x<=max_x; x++) {
+         for (let y=0; y<=max_y; y++) {
+            s.point(x*square_size, y*square_size);
          }
       }
    }
-}
 
-function drawTestfits() {
-   noStroke();
-   for (let x=0; x<max_x; x++) {
-      for (let y=0; y<max_y; y++) {
-         let a = grid[x][y].testfit;
-         if (a > 0) {
-            fill(255,0,0,a);
-            rect(x*square_size, y*square_size, square_size, square_size);
+   s.drawLayout = () => {
+      s.textSize(0.2*square_size);
+      for (let x=0; x<max_x; x++) {
+         for (let y=0; y<max_y; y++) {
+            if (grid[x][y].id1 >= 0) {
+               s.stroke(0);
+               s.noFill();
+               s.rect(x*square_size, y*square_size, square_size, square_size);
+            }
+            if (grid[x][y].label > 0) {
+               s.noStroke();
+               s.fill(0);
+               s.text(grid[x][y].label, x*square_size+square_size/4, y*square_size+square_size/4);
+            }
          }
       }
    }
-}
 
-function drawWords() {
-   noStroke();
-   fill(0);
-   textSize(0.8*square_size);
-   for (let x=0; x<max_x; x++) {
-      for (let y=0; y<max_y; y++) {
-         text(grid[x][y].letter, x*square_size+2*square_size/3, y*square_size+2*square_size/3);
+   s.drawTestfits = () => {
+      s.noStroke();
+      for (let x=0; x<max_x; x++) {
+         for (let y=0; y<max_y; y++) {
+            let a = grid[x][y].testfit;
+            if (a > 0) {
+               s.fill(255,0,0,a);
+               s.rect(x*square_size, y*square_size, square_size, square_size);
+            }
+         }
       }
    }
+
+   s.drawWords = () => {
+      s.noStroke();
+      s.fill(0);
+      s.textSize(0.8*square_size);
+      for (let x=0; x<max_x; x++) {
+         for (let y=0; y<max_y; y++) {
+            s.text(grid[x][y].letter, x*square_size+2*square_size/3, y*square_size+2*square_size/3);
+         }
+      }
+   }
+
 }
+
+let crossword_render = new p5(crossword_p5);
 
 // ---------------------- objects ------------------------- //
 
@@ -181,7 +183,6 @@ function load(game) {
       }
    }
 }
-
 
 // ---------------------- debug ------------------------- //
 

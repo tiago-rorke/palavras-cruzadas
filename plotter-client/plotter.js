@@ -35,8 +35,10 @@ internal.Plotter = class {
       this.up_pos = default_up_pos;
       this.down_pos = default_down_pos;
 
+      this.draw_buffer = [];
       this.draw_log = [];
-      this.drawing = false;
+      this.drawing = false; // draw state when adding vertices to draw_buffer
+      this.plotting = false; // draw state when sending commands to plotter
       this.init();
 
 		this.grbl.pipe(this.port).pipe(this.grbl)
@@ -76,25 +78,41 @@ internal.Plotter = class {
       await this.send("M3 S" + this.up_pos);
    }
 
-   async beginDraw(x, y) {
-      this.vertex(x,y);
-      await this.send("M3 S" + this.down_pos);
-      await this.send("G4 P" + this.down_delay/1000);
+   // beginDraw, endDraw, vertex; loads drawing into draw_buffer
+
+   beginDraw() {
       this.drawing = true;
    }
 
-   async endDraw() {
-      await this.send("M3 S" + this.up_pos);
-      await this.send("G4 P" + this.up_delay/1000);
+   endDraw() {
+      this.draw_buffer[this.draw_buffer.length - 1].drawing = false;
       this.drawing = false;
    }
 
-   async vertex(x, y) {
-      this.draw_log.push({
+   vertex(x, y) {
+      this.draw_buffer.push({
          x: x,
          y: y,
          drawing: this.drawing
       });
+   }
+
+   // beginPlot, endPlot, vertexPlot; sends drawing commmands to plotter
+
+   async beginPlot(x, y) {
+      this.vertex(x,y);
+      await this.send("M3 S" + this.down_pos);
+      await this.send("G4 P" + this.down_delay/1000);
+      this.plotting = true;
+   }
+
+   async endPlot() {
+      await this.send("M3 S" + this.up_pos);
+      await this.send("G4 P" + this.up_delay/1000);
+      this.plotting = false;
+   }
+
+   async vertexPlot(x, y) {
       if (this.drawing) {
          await this.send("G1 X" + x + " Y" + y + " F" + this.draw_speed);
          //await this.send("G1 F" + this.draw_speed);

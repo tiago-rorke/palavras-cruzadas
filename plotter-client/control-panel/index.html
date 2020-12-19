@@ -9,6 +9,7 @@
       <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.js"></script>
       <script src="./control-panel.js"></script>
       <script src="./crossword-render.js"></script>
+      <script src="./plotter-render.js"></script>
       <style>
         body {
           font-family: sans-serif;
@@ -39,14 +40,14 @@
       <input style="width:100px" id="down_delay" type="number"/><span>  after delay</span><br />
       <button id="set_config" type="button">set config</button><br />
       <br /><hr><br />
+      <h2>PLOTTER</h2>
       <button id="test" type="button">test plot</button><br />
+      <div id="plotter_canvas" style="margin:20px"></div>
       <br /><hr><br />
-      <button id="update" type="button">update game</button><br />
+      <h2>CROSSWORD</h2>
+      <button id="update" type="button">update</button><br />
       <button id="new_word" type="button">new word</button><br />
-
-      <div id="canvas" style="margin:20px">
-         <!-- canvas goes here -->
-      </div>
+      <div id="crossword_canvas" style="margin:20px"></div>
    </body>
 </html>
 

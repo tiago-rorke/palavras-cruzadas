@@ -159,40 +159,80 @@ cp_socket.on('connection', (socket) => {
 
    socket.on('test', async () => {
       console.log('test routine');
-      await plotter.beginDraw(0,0);
-      await plotter.vertex(0,10);
-      await plotter.vertex(10,10);
-      await plotter.vertex(10,0);
-      await plotter.vertex(0,0);
-      await plotter.endDraw();
-      console.log(plotter.draw_log);
+      /*
+      plotter.beginDraw();
+      plotter.vertex(10,10);
+      plotter.vertex(10,30);
+      plotter.vertex(30,30);
+      plotter.vertex(30,10);
+      plotter.vertex(10,10);
+      plotter.endDraw();
+      plotter.beginDraw();
+      plotter.vertex(40,10);
+      plotter.vertex(40,30);
+      plotter.vertex(60,30);
+      plotter.vertex(60,10);
+      plotter.vertex(40,10);
+      plotter.endDraw();
+      */
+      //drawChar('H', 100, 100, 10);
+      drawText('HELLO MY NAME IS MIMI', 20, 20, 5, 0.15);
+      update_plotter_render();
+      await draw_from_buffer();
+      //console.log(plotter.draw_log);
    });
 
 });
 
 
+function update_plotter_render() {
+   cp_socket.emit('update_drawing', plotter.draw_buffer, plotter.draw_log);
+}
+
+async function draw_from_buffer() {
+
+   while(plotter.draw_buffer.length > 0) {
+
+      let p = plotter.draw_buffer.shift();
+      plotter.draw_log.push(p);
+
+      if(p.drawing && !plotter.plotting) {
+         await plotter.beginPlot(p.x, p.y);
+         update_plotter_render();
+      } else if(!p.drawing && plotter.plotting) {
+         await plotter.vertexPlot(p.x, p.y);
+         update_plotter_render();
+         await plotter.endPlot();
+      } else {
+         await plotter.vertexPlot(p.x, p.y);
+         update_plotter_render();
+      }
+   }
+}
+
 // ---------------------------- DRAWING ---------------------------- //
 
 
-function drawChar(index, x, y, scale) {
+function drawChar(char, x, y, scale) {
 
+   let index = char.charCodeAt(0) - 32;
    let line = false;
 
    for (let h=0; h<11; h++) {
 
-      if(codefont[index][0][h] > -1 && !line) {
+      if(codefont.font[index][0][h] > -1 && !line) {
          plotter.beginDraw();
          line = true;
       }
 
-      if(h>0 && codefont[index][0][h] < 0 && line) {
+      if(h>0 && codefont.font[index][0][h] < 0 && line) {
          plotter.endDraw();
          line = false;
       }
 
-      if(codefont[index][0][h] > -1) {
-         let vx = codefont[index][0][h] * scale + x;
-         let vy = codefont[index][1][h] * -scale + y;
+      if(codefont.font[index][0][h] > -1) {
+         let vx = codefont.font[index][0][h] * scale + x;
+         let vy = codefont.font[index][1][h] * scale + y;
          plotter.vertex(vx, vy);
       }
 
@@ -202,6 +242,14 @@ function drawChar(index, x, y, scale) {
       }
    }
 }
+
+function drawText(text, x, y, scale, spacing) {
+   for(let i=0; i<text.length; i++) {
+      drawChar(text.charAt(i), x, y, scale);
+      x += (3*scale)*(1 + spacing);
+   }
+}
+
 
 /*
 function drawAlphabet(float x, float y, float fontScale) {
@@ -220,10 +268,4 @@ void drawScaledAlphabets(float x, float y) {
    drawAlphabet(x, y+170, 0.45);
 }
 
-void drawText(float x, float y, String text, float textSize) {
-   for(int i=0; i<text.length(); i++) {
-      drawChar((int)text.charAt(i)-32, x, y, textSize/5);
-      x += (3*textSize/5)*1.15;
-   }
-}
 */

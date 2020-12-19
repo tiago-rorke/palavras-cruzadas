@@ -384,4 +384,4 @@ let codefont =
 ];
 
 
-exports.codefont = codefont;
+exports.font = codefont;
