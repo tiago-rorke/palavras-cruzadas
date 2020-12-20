@@ -81,7 +81,7 @@ server_socket.on('connect', () => {
 cp_socket.on('connection', (socket) => {
    console.log('control panel connected');
 
-   // ------------------- CROSSWORD ---------------------- //
+   // ------- CROSSWORD ------- //
 
    socket.on('update', () => {
       console.log('update');
@@ -102,7 +102,7 @@ cp_socket.on('connection', (socket) => {
 
    });
 
-   // ---------------------- GBRL ----------------------- //
+   // ------- GBRL ------- //
 
    socket.on('get_status', async () => {
       console.log('get_status');
@@ -141,6 +141,8 @@ cp_socket.on('connection', (socket) => {
          await plotter.send(gcode[i]);
       }
    });
+
+   // ------- DRAWING ------- //
 
    socket.on('set_config', (config) => {
       plotter.travel_speed = config.travel_speed;
@@ -196,14 +198,22 @@ cp_socket.on('connection', (socket) => {
       plotter.vertex(40,10);
       plotter.endDraw();
       */
+      //drawChar(char, x, y, text_height);
+      //drawText(text, x, y, text_height, text_spacing);
+      //draw_gridlines(x, y, scale, horizontal_first)
+
       //drawChar('H', 100, 100, 10);
       //drawText('HELLO MY NAME IS MIMI', 20, 20, 5, 0.15);
-      drawText(text, 20, 20, text_height, text_spacing);
+      draw_gridlines(20, 20, 5, true);
+
       update_plotter_render();
       //console.log(plotter.draw_log);
    });
 
 });
+
+
+// ------------------------------ GUI ------------------------------ //
 
 
 function update_plotter_render() {
@@ -230,6 +240,7 @@ async function draw_from_buffer() {
       }
    }
 }
+
 
 // ---------------------------- DRAWING ---------------------------- //
 
@@ -271,6 +282,73 @@ function drawText(text, x, y, scale, spacing) {
    }
 }
 
+
+function draw_gridlines(x, y, scale, horizontal_first) {
+   if(horizontal_first) {
+      draw_gridlines_h(x, y, s);
+      draw_gridlines_v(x, y, s);
+   } else {
+      draw_gridlines_v(x, y, s);
+      draw_gridlines_h(x, y, s);
+   }
+
+}
+
+function draw_gridlines_h(px, py, s) {
+
+   for (let x=0; x<crossword.width+1; x++) {
+      for (let y=0; y<crossword.height; y++) {
+         if(crossword.gridlines_h[x][y] > 0) {
+
+            // if starting a line
+            if(x == 0 || (x > 0 && crossword.gridlines_h[x-1][y] < 1)) {
+               plotter.beginDraw();
+               let vx = x*s + px;
+               let vy = y*s + pw;
+               plotter.vertex(vx, vy);
+            }
+
+            // if ending a line
+            if(x == crossword.width || (x < crossword.width && crossword.gridlines_h[x+1][y] < 1)) {
+               let vx = (x+1)*s + px;
+               let vy = y*s + pw;
+               plotter.vertex(vx, vy);
+               plotter.endDraw();
+            }
+
+            crossword.gridlines_h[x][y] = 0;
+         }
+      }
+   }
+}
+
+function draw_gridlines_v(px, py, s) {
+
+   for (let x=0; x<crossword.width; x++) {
+      for (let y=0; y<crossword.height+1; y++) {
+         if(crossword.gridlines_v[x][y] > 0) {
+
+            // if starting a line
+            if(y == 0 || (y > 0 && crossword.gridlines_v[x][y-1] < 1)) {
+               plotter.beginDraw();
+               let vx = x*s + px;
+               let vy = y*s + pw;
+               plotter.vertex(vx, vy);
+            }
+
+            // if ending a line
+            if(x == crossword.width || (x < crossword.width && crossword.gridlines_v[x][y+1] < 1)) {
+               let vx = x*s + px;
+               let vy = (y+1)*s + pw;
+               plotter.vertex(vx, vy);
+               plotter.endDraw();
+            }
+
+            crossword.gridlines_v[x][y] = 0;
+         }
+      }
+   }
+}
 
 /*
 function drawAlphabet(float x, float y, float fontScale) {

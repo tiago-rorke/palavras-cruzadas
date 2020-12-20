@@ -10,17 +10,23 @@ class Word {
       this.word = word;
       this.clue = clue;
       this.solved = false;
+
       // square number and direction in order to label the clue (ie: "14 down" or "12 across")
       this.label = label;
       this.horizontal = horizontal;
 
-      // new
       this.x = x;  // coordinates of first letter
       this.y = y;
       this.entrytime;      // when word was added
       this.solvedtime = -1;     // when word was solved
       this.solveattempts = 0;  // number of tries at solving the clue
       this.player;
+
+      // used for drawing with plotter
+      // -1 = nothing to draw
+      //  0 = drawn
+      //  1 = waiting to be drawn
+      this.drawing = -1
    }
 }
 
@@ -63,6 +69,13 @@ internal.Crossword = class {
       this.words = []; // array of word objects
       this.grid = []; // 2d array of square objects
 
+      // used for drawing with plotter
+      // -1 = nothing to draw
+      //  0 = drawn
+      //  1 = waiting to be drawn
+      this.gridlines_h = []; // [x][y+1]
+      this.gridlines_v = []; // [x+1][y]
+
       // to increment the number label as needed.
       this.label_index = 0;
 
@@ -70,13 +83,7 @@ internal.Crossword = class {
       this.start_time = "";
       this.end_time = "";
 
-      for (let x=0; x<this.width; x++) {
-         this.grid[x] = [];
-         for (let y=0; y<this.height; y++) {
-            //console.log(x,y);
-            this.grid[x][y] = new Square();
-         }
-      }
+      this.initGrid();
    }
 
 
@@ -88,14 +95,33 @@ internal.Crossword = class {
       this.height = h;
       this.words = []
       this.grid = [];
+      this.gridlines_h = [];
+      this.gridlines_v = [];
       this.label_index = 0;
       this.start_time = "";
       this.end_time = "";
+      this.initGrid();
+   }
+
+   initGrid() {
+      // init the crossword grid
       for (let x=0; x<this.width; x++) {
-         this.grid[x] = []
+         this.grid[x] = [];
          for (let y=0; y<this.height; y++) {
-            //console.log(x,y);
             this.grid[x][y] = new Square();
+         }
+      }
+      // init the gridlines
+      for (let x=0; x<this.width+1; x++) {
+         this.gridlines_h[x] = [];
+         for (let y=0; y<this.height; y++) {
+           this.gridlines_h[x][y] = -1;
+         }
+      }
+      for (let x=0; x<this.width; x++) {
+         this.gridlines_v[x] = [];
+         for (let y=0; y<this.height+1; y++) {
+           this.gridlines_v[x][y] = -1;
          }
       }
    }
@@ -138,31 +164,8 @@ internal.Crossword = class {
             this.label_index = w.label;
          }
 
-         // update the grid
-         this.grid[w.x][w.y].label = w.label;
-         for(let h=0; h<w.word.length; h++) {
-            if(w.horizontal) {
-               this.grid[w.x + h][w.y].letter = w.word.charAt(h);
-               if(!this.grid[w.x + h][w.y].solved) {
-                  this.grid[w.x + h][w.y].solved = w.solved;
-               }
-               if (this.grid[w.x+h][w.y].id1 >= 0) {
-                  this.grid[w.x+h][w.y].id2 = i;
-               } else {
-                  this.grid[w.x+h][w.y].id1 = i;
-               }
-            } else {
-               this.grid[w.x][w.y + h].letter = w.word.charAt(h);
-               if (this.grid[w.x][w.y+h].id1 >= 0) {
-                  this.grid[w.x][w.y+h].id2 = i;
-               } else {
-                  this.grid[w.x][w.y+h].id1 = i;
-               }
-               if(!this.grid[w.x][w.y + h].solved) {
-                  this.grid[w.x][w.y + h].solved = w.solved;
-               }
-            }
-         }
+         this.updateGrid();
+         this.updateGridlines();
       }
 
       // not sure if should be an async function...
@@ -196,6 +199,49 @@ internal.Crossword = class {
       return true;
    }
 
+   // update the crossword grid based on words[]
+   updateGrid() {
+      for(let i=0; i<this.words.length; i++) {
+         let w = this.words[i];
+         this.grid[w.x][w.y].label = w.label;
+         for(let h=0; h<w.word.length; h++) {
+            if(w.horizontal) {
+               this.grid[w.x + h][w.y].letter = w.word.charAt(h);
+               if(!this.grid[w.x + h][w.y].solved) {
+                  this.grid[w.x + h][w.y].solved = w.solved;
+               }
+               if (this.grid[w.x+h][w.y].id1 >= 0) {
+                  this.grid[w.x+h][w.y].id2 = i;
+               } else {
+                  this.grid[w.x+h][w.y].id1 = i;
+               }
+            } else {
+               this.grid[w.x][w.y + h].letter = w.word.charAt(h);
+               if (this.grid[w.x][w.y+h].id1 >= 0) {
+                  this.grid[w.x][w.y+h].id2 = i;
+               } else {
+                  this.grid[w.x][w.y+h].id1 = i;
+               }
+               if(!this.grid[w.x][w.y + h].solved) {
+                  this.grid[w.x][w.y + h].solved = w.solved;
+               }
+            }
+         }
+      }
+   }
+
+   updateGridlines() {
+      for (let x=0; x<this.width; x++) {
+         for (let y=0; y<this.height; y++) {
+            if (this.grid[x][y].letter != ' ') {
+               this.gridlines_v[x][y] = 1;
+               this.gridlines_v[x+1][y] = 1;
+               this.gridlines_h[x][y] = 1;
+               this.gridlines_h[x][y+1] = 1;
+            }
+         }
+      }
+   }
 
    // ---------------------- word functiosn ------------------------- //
 
@@ -541,6 +587,7 @@ internal.Crossword = class {
             }
          }
       }
+      this.updateGridlines();
       let word = new Word(word_string, x, y, label, horizontal, clue_string);
       this.words.push(word);
       // console.log(label, horizontal?'across':'down',':', clue_string);
