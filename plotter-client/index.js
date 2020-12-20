@@ -30,8 +30,8 @@ let crossword = new Crossword(0,0);
 let game_file = "./assets/game.json";
 
 const Plotter = require('./plotter');
-//let plotter = new Plotter('/dev/ttyUSB0', 115200);
-let plotter = new Plotter('/dev/ttyACM0', 115200);
+let plotter = new Plotter('/dev/ttyUSB0', 115200);
+//let plotter = new Plotter('/dev/ttyACM0', 115200);
 
 const codefont = require('./codefont');
 
@@ -282,6 +282,13 @@ function drawText(text, x, y, scale, spacing) {
    }
 }
 
+function drawWord(w, scale, text_height) {
+   for(let i=0; i<w.word.length; i++) {
+      // x = ? w.x ...
+      // y = ? w.y ...
+      drawChar(w.word.charAt(i), x, y, scale);
+   }
+}
 
 function draw_gridlines(x, y, scale, horizontal_first) {
    if(horizontal_first) {
