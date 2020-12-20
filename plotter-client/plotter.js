@@ -39,7 +39,7 @@ internal.Plotter = class {
       this.draw_log = [];
       this.drawing = false; // draw state when adding vertices to draw_buffer
       this.plotting = false; // draw state when sending commands to plotter
-      this.init();
+      //this.init();
 
 		this.grbl.pipe(this.port).pipe(this.grbl)
 		   .on('command', cmd => console.log('>', cmd))
@@ -57,6 +57,7 @@ internal.Plotter = class {
    	return new Promise((resolve, reject) => {
          resolve(true);
       });
+      this.init();
    }
    async status() {
       let status = await this.grbl.status();

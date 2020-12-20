@@ -12,7 +12,7 @@ const server_socket = socketIO_client.connect(server_url);
 
 // websockets connection to control panel
 const app = express();
-const cp_server = app.listen(8000, () => console.log(`Listening on 8000`));
+const cp_server = app.listen(3001, () => console.log(`Listening on 3001`));
 const cp_socket = socketIO(cp_server);
 
 
