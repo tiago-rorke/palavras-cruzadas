@@ -12,7 +12,7 @@ const server_socket = socketIO_client.connect(server_url);
 
 // websockets connection to control panel
 const app = express();
-const cp_server = app.listen(3001, () => console.log(`Listening on 3001`));
+const cp_server = app.listen(8000, () => console.log(`Listening on 8000`));
 const cp_socket = socketIO(cp_server);
 
 
@@ -181,6 +181,8 @@ cp_socket.on('connection', (socket) => {
       update_plotter_render();
    });
    socket.on('draw', async (text, text_height, text_spacing) => {
+      let x = 20;
+      let y = 20;
       console.log('draw to buffer');
       /*
       plotter.beginDraw();
@@ -199,12 +201,12 @@ cp_socket.on('connection', (socket) => {
       plotter.endDraw();
       */
       //drawChar(char, x, y, text_height);
-      //drawText(text, x, y, text_height, text_spacing);
+      drawText(text, x, y, text_height, text_spacing);
       //draw_gridlines(x, y, scale, horizontal_first)
 
       //drawChar('H', 100, 100, 10);
       //drawText('HELLO MY NAME IS MIMI', 20, 20, 5, 0.15);
-      draw_gridlines(20, 20, 5, true);
+      //draw_gridlines(20, 20, 5, true);
 
       update_plotter_render();
       //console.log(plotter.draw_log);
@@ -292,11 +294,11 @@ function drawWord(w, scale, text_height) {
 
 function draw_gridlines(x, y, scale, horizontal_first) {
    if(horizontal_first) {
-      draw_gridlines_h(x, y, s);
-      draw_gridlines_v(x, y, s);
+      draw_gridlines_h(x, y, scale);
+      draw_gridlines_v(x, y, scale);
    } else {
-      draw_gridlines_v(x, y, s);
-      draw_gridlines_h(x, y, s);
+      draw_gridlines_v(x, y, scale);
+      draw_gridlines_h(x, y, scale);
    }
 
 }
