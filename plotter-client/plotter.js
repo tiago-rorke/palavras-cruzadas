@@ -25,7 +25,7 @@ const internal = {};
 internal.Plotter = class {
 
    constructor(port, baud) {
-   	this.port = new SerialPort(port, { baudRate: baud})
+      this.connect(port, baud);
 		this.grbl = new GrblStream()
 
       this.travel_speed = default_travel_speed;
@@ -44,6 +44,11 @@ internal.Plotter = class {
 		this.grbl.pipe(this.port).pipe(this.grbl)
 		   .on('command', cmd => console.log('>', cmd))
 		   .on('message', msg => console.log('<', msg))
+   }
+
+   connect(port, baud) {
+      console.log("connecting plotter at port: " + port)
+      this.port = new SerialPort(port, { baudRate: baud})
    }
 
    async home() {

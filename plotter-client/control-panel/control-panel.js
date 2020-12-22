@@ -31,15 +31,20 @@ $(function () {
       $("#status").text(data.state);
    });
 
+   let home = document.getElementById('home');
+   home.onclick = () => {
+      console.log('[grbl] home');
+      socket.emit('home');
+   }
    let unlock = document.getElementById('unlock');
    unlock.onclick = () => {
       console.log('[grbl] unlock');
       socket.emit('unlock');
    }
-   let home = document.getElementById('home');
-   home.onclick = () => {
-      console.log('[grbl] home');
-      socket.emit('home');
+   let reset = document.getElementById('reset');
+   reset.onclick = () => {
+      console.log('[grbl] reset');
+      socket.emit('reset');
    }
    let play = document.getElementById('play');
    play.onclick = () => {
@@ -220,7 +225,7 @@ $(function () {
 
 function update_crossword() {
 
-   fetch("/assets/game.json")
+   fetch("/data/game.json")
    .then((res) => res.json())
    .then((out) => {
       // out.words.forEach((word) => {

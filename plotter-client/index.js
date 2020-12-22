@@ -6,32 +6,37 @@ const fetch = require('node-fetch');
 const socketIO = require('socket.io');
 const socketIO_client = require('socket.io-client');
 
-// websockets connection to server (heroku app)
-const server_url = "http://localhost:3000";
-const server_socket = socketIO_client.connect(server_url);
-
-// websockets connection to control panel
+// server for control panel
 const app = express();
-const cp_server = app.listen(3001, () => console.log(`Listening on 3001`));
-const cp_socket = socketIO(cp_server);
-
-
-//app.use(express.static('/'));
 app.use("/", express.static(__dirname + '/control-panel/'));
-app.use("/assets/", express.static(__dirname + '/assets/'));
+app.use("/data/", express.static(__dirname + '/data/'));
 app.get('/', function (req, res){
    res.sendFile(__dirname + '/control-panel/index.html');
 });
 
+// data files
+const config_file = "./data/config.json"
+const game_file = "./data/game.json";
+let config;
+try {
+   config = JSON.parse(fs.readFileSync(config_file, 'utf8'));
+} catch (err) {
+   return console.log(err);
+}
+
+// websockets connection to server (heroku app)
+const server_socket = socketIO_client.connect(config.server_url);
+
+// websockets connection to control panel
+const cp_server = app.listen(config.control_panel.port, () => console.log('control panel available at port ' + config.control_panel.port));
+const cp_socket = socketIO(cp_server);
+
+const Plotter = require('./plotter');
+let plotter = new Plotter(config.plotter.port, config.plotter.baud);
+
 const Crossword = require('./crossword');
 let crossword = new Crossword(0,0);
 //crossword.init();
-
-let game_file = "./assets/game.json";
-
-const Plotter = require('./plotter');
-let plotter = new Plotter('/dev/ttyUSB0', 115200);
-//let plotter = new Plotter('/dev/ttyACM0', 115200);
 
 const codefont = require('./codefont');
 
@@ -62,7 +67,7 @@ server_socket.on('connect', () => {
    console.log('connected to server');
 
    server_socket.on("fileChanged", () => {
-      fetch(server_url + "/game.json")
+      fetch(config.server_url + "/game.json")
       .then((res) => res.json())
       .then((out) => {
          fs.writeFileSync(game_file, JSON.stringify(out,null,1));
@@ -121,6 +126,12 @@ cp_socket.on('connection', (socket) => {
       await plotter.unlock();
    });
 
+   socket.on('reset', async () => {
+      console.log('reset');
+      plotter.port.close();
+      plotter.connect(config.plotter.port, config.plotter.baud);
+   });
+
    socket.on('play', async () => {
       console.log('draw from buffer');
       await draw_from_buffer();
@@ -175,7 +186,7 @@ cp_socket.on('connection', (socket) => {
    });
 
    socket.on('clear', () => {
-      console.log("clear drawing");
+      console.log("clear buffer");
       plotter.draw_buffer = [];
       plotter.draw_log = [];
       update_plotter_render();
@@ -206,7 +217,7 @@ cp_socket.on('connection', (socket) => {
 
       //drawChar('H', 100, 100, 10);
       //drawText('HELLO MY NAME IS MIMI', 20, 20, 5, 0.15);
-      //draw_gridlines(20, 20, 5, true);
+      //draw_gridlines(20, 20, text_height, true);
 
       update_plotter_render();
       //console.log(plotter.draw_log);
@@ -313,14 +324,14 @@ function draw_gridlines_h(px, py, s) {
             if(x == 0 || (x > 0 && crossword.gridlines_h[x-1][y] < 1)) {
                plotter.beginDraw();
                let vx = x*s + px;
-               let vy = y*s + pw;
+               let vy = y*s + py;
                plotter.vertex(vx, vy);
             }
 
             // if ending a line
             if(x == crossword.width || (x < crossword.width && crossword.gridlines_h[x+1][y] < 1)) {
                let vx = (x+1)*s + px;
-               let vy = y*s + pw;
+               let vy = y*s + py;
                plotter.vertex(vx, vy);
                plotter.endDraw();
             }
@@ -341,14 +352,14 @@ function draw_gridlines_v(px, py, s) {
             if(y == 0 || (y > 0 && crossword.gridlines_v[x][y-1] < 1)) {
                plotter.beginDraw();
                let vx = x*s + px;
-               let vy = y*s + pw;
+               let vy = y*s + py;
                plotter.vertex(vx, vy);
             }
 
             // if ending a line
             if(x == crossword.width || (x < crossword.width && crossword.gridlines_v[x][y+1] < 1)) {
                let vx = x*s + px;
-               let vy = (y+1)*s + pw;
+               let vy = (y+1)*s + py;
                plotter.vertex(vx, vy);
                plotter.endDraw();
             }
