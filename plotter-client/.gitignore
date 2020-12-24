@@ -2,7 +2,6 @@
 
 data/config.json
 data/game.json
-data/archive/*
 
 # Logs
 logs
