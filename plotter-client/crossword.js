@@ -243,6 +243,23 @@ internal.Crossword = class {
       }
    }
 
+   undrawGridlines() {
+      for (let x=0; x<this.width+1; x++) {
+         for (let y=0; y<this.height; y++) {
+            if(this.gridlines_h[x][y] == 0) {
+               this.gridlines_h[x][y] = 1;
+            }
+         }
+      }
+      for (let x=0; x<this.width; x++) {
+         for (let y=0; y<this.height+1; y++) {
+            if(this.gridlines_v[x][y] == 0) {
+               this.gridlines_v[x][y] = 1;
+            }
+         }
+      }
+   }
+
    // ---------------------- word functiosn ------------------------- //
 
    /*

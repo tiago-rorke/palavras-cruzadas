@@ -181,6 +181,7 @@ $(function () {
 
    socket.on('update_drawing', (draw_buffer, draw_log) => {
       console.log('update drawing');
+      console.log(draw_buffer.length + ' : ' + draw_log.length);
       //console.log(draw_log);
       plotter_render.update(draw_buffer, draw_log);
    });

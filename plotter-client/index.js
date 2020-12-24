@@ -134,7 +134,7 @@ cp_socket.on('connection', (socket) => {
 
    socket.on('play', async () => {
       console.log('draw from buffer');
-      await draw_from_buffer();
+      await drawFromBuffer();
    });
 
    socket.on('feed_hold', async () => {
@@ -189,7 +189,7 @@ cp_socket.on('connection', (socket) => {
       console.log("clear buffer");
       plotter.draw_buffer = [];
       plotter.draw_log = [];
-      update_plotter_render();
+      updatePlotterRender();
    });
    socket.on('draw', async (text, text_height, text_spacing) => {
       let x = 20;
@@ -212,14 +212,17 @@ cp_socket.on('connection', (socket) => {
       plotter.endDraw();
       */
       //drawChar(char, x, y, text_height);
-      drawText(text, x, y, text_height, text_spacing);
-      //draw_gridlines(x, y, scale, horizontal_first)
+      //drawText(text, x, y, text_height, text_spacing);
+      //drawGridlines(x, y, scale, horizontal_first)
 
       //drawChar('H', 100, 100, 10);
       //drawText('HELLO MY NAME IS MIMI', 20, 20, 5, 0.15);
-      //draw_gridlines(20, 20, text_height, true);
 
-      update_plotter_render();
+      crossword.undrawGridlines();
+      drawGridlines(20, 20, text_height, true);
+      drawGridBounds(20, 20, text_height, false);
+
+      updatePlotterRender();
       //console.log(plotter.draw_log);
    });
 
@@ -229,11 +232,11 @@ cp_socket.on('connection', (socket) => {
 // ------------------------------ GUI ------------------------------ //
 
 
-function update_plotter_render() {
+function updatePlotterRender() {
    cp_socket.emit('update_drawing', plotter.draw_buffer, plotter.draw_log);
 }
 
-async function draw_from_buffer() {
+async function drawFromBuffer() {
 
    while(plotter.draw_buffer.length > 0) {
 
@@ -242,14 +245,14 @@ async function draw_from_buffer() {
 
       if(p.drawing && !plotter.plotting) {
          await plotter.beginPlot(p.x, p.y);
-         update_plotter_render();
+         updatePlotterRender();
       } else if(!p.drawing && plotter.plotting) {
          await plotter.vertexPlot(p.x, p.y);
-         update_plotter_render();
+         updatePlotterRender();
          await plotter.endPlot();
       } else {
          await plotter.vertexPlot(p.x, p.y);
-         update_plotter_render();
+         updatePlotterRender();
       }
    }
 }
@@ -303,46 +306,60 @@ function drawWord(w, scale, text_height) {
    }
 }
 
-function draw_gridlines(x, y, scale, horizontal_first) {
+function drawGridlines(x, y, scale, horizontal_first) {
+
+   y += crossword.height * scale;
+   //console.log(scale);
    if(horizontal_first) {
-      draw_gridlines_h(x, y, scale);
-      draw_gridlines_v(x, y, scale);
+      drawGridlinesH(x, y, scale);
+      drawGridlinesV(x, y, scale);
    } else {
-      draw_gridlines_v(x, y, scale);
-      draw_gridlines_h(x, y, scale);
+      drawGridlinesV(x, y, scale);
+      drawGridlinesH(x, y, scale);
    }
 
 }
 
-function draw_gridlines_h(px, py, s) {
+function drawGridlinesH(px, py, s) {
 
-   for (let x=0; x<crossword.width+1; x++) {
-      for (let y=0; y<crossword.height; y++) {
+   //console.log('hrz ' + crossword.gridlines_h.length);
+   //console.log('vrt ' + crossword.gridlines_v.length);
+
+   for (let y=0; y<crossword.height; y++) {
+      //process.stdout.write('|');
+      for (let x=0; x<crossword.width+1; x++) {
+
+         //console.log(crossword.gridlines_h[x][y]);
          if(crossword.gridlines_h[x][y] > 0) {
 
+            //process.stdout.write('o');
             // if starting a line
             if(x == 0 || (x > 0 && crossword.gridlines_h[x-1][y] < 1)) {
                plotter.beginDraw();
                let vx = x*s + px;
-               let vy = y*s + py;
+               let vy = -y*s + py;
                plotter.vertex(vx, vy);
             }
 
             // if ending a line
             if(x == crossword.width || (x < crossword.width && crossword.gridlines_h[x+1][y] < 1)) {
                let vx = (x+1)*s + px;
-               let vy = y*s + py;
+               let vy = -y*s + py;
                plotter.vertex(vx, vy);
                plotter.endDraw();
+               //process.stdout.write('\'');
             }
 
             crossword.gridlines_h[x][y] = 0;
+         } else {
+            //process.stdout.write('.');
          }
       }
+      //process.stdout.write('|' + plotter.draw_buffer.length + '\n');
    }
 }
 
-function draw_gridlines_v(px, py, s) {
+function drawGridlinesV(px, py, s) {
 
    for (let x=0; x<crossword.width; x++) {
       for (let y=0; y<crossword.height+1; y++) {
@@ -352,14 +369,14 @@ function draw_gridlines_v(px, py, s) {
             if(y == 0 || (y > 0 && crossword.gridlines_v[x][y-1] < 1)) {
                plotter.beginDraw();
                let vx = x*s + px;
-               let vy = y*s + py;
+               let vy = -y*s + py;
                plotter.vertex(vx, vy);
             }
 
             // if ending a line
-            if(x == crossword.width || (x < crossword.width && crossword.gridlines_v[x][y+1] < 1)) {
+            if(y == crossword.height || (y < crossword.height && crossword.gridlines_v[x][y+1] < 1)) {
                let vx = x*s + px;
-               let vy = (y+1)*s + py;
+               let vy = -(y+1)*s + py;
                plotter.vertex(vx, vy);
                plotter.endDraw();
             }
@@ -367,6 +384,26 @@ function draw_gridlines_v(px, py, s) {
             crossword.gridlines_v[x][y] = 0;
          }
       }
+   }
+}
+
+function drawGridBounds(px, py, s, draw) {
+
+   let x1 = px;
+   let y1 = py;
+   let x2 = px + crossword.width * s;
+   let y2 = py + crossword.height * s;
+
+   if (draw) {
+      plotter.beginDraw();
+   }
+   plotter.vertex(x1,y1);
+   plotter.vertex(x2,y1);
+   plotter.vertex(x2,y2);
+   plotter.vertex(x1,y2);
+   plotter.vertex(x1,y1);
+   if (draw) {
+      plotter.endDraw();
    }
 }
 

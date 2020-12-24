@@ -2,18 +2,24 @@
 
 // ---------------------- p5.js ------------------------- //
 
+// disable the context menu to allow for right-click zoom interaction
+//$('body').on('contextmenu', 'crossword_canvas', function(e){ return false; });
+
 const crossword_p5 = (s) => {
 
+   // square size at 0 zoom
    let square_size = 30;
-   let canvas_width = 700;
-   let canvas_height = 500;
+   let canvas_width = 750;
+   let canvas_height = 550;
 
-   // grid size
-   let max_x = Math.floor(canvas_width/square_size);
-   let max_y = Math.floor(canvas_height/square_size);
+   let pan_x = 0;
+   let pan_y = 0;
+   let zoom = 0;
+   let zoom_ref = 1;
+   let min_zoom = 0.1;
+   let max_zoom = 5;
 
    s.setup = () => {
-
       let canvas = s.createCanvas(canvas_width, canvas_height);
       canvas.parent('crossword_canvas');
 
@@ -21,31 +27,87 @@ const crossword_p5 = (s) => {
       s.strokeWeight(2);
       s.textAlign(s.CENTER, s.CENTER);
       s.smooth();
+
+      // save 0 transformation position
+      s.push();
+      s.translate(s.width/2, s.height/2);
+   }
+
+   s.mouseDragged = () => {
+      if(s.mouseX > 0 && s.mouseX < s.width &&
+         s.mouseY > 0 && s.mouseY < s.height) {
+         if (s.mouseButton === s.LEFT) {
+            pan_x += s.mouseX - s.pmouseX;
+            pan_y += s.mouseY - s.pmouseY;
+         } else {
+            zoom += (s.mouseY - s.pmouseY);
+         }
+      }
+      return false;
+   }
+
+   s.mouseReleased = () => {
+      s.update();
+      pan_x = 0;
+      pan_y = 0;
+      zoom = 0;
+   }
+
+   s.resetPanZoom = () => {
+      s.pop();
+      zoom_ref = 1;
+      s.push();
+      s.translate(s.width/2, s.height/2);
+      s.update();
+   }
+   s.keyPressed = () => {
+      s.resetPanZoom();
    }
 
    s.update = () => {
       s.background(255);
+
+      // transformations
+      let z = 1 + 0.005* zoom;
+      pzoom_ref = zoom_ref;
+      zoom_ref *= z;
+      if (zoom_ref > max_zoom) {
+         zoom_ref = max_zoom;
+         z = zoom_ref/pzoom_ref;
+      }
+      if (zoom_ref < min_zoom) {
+         zoom_ref = min_zoom;
+         z = zoom_ref/pzoom_ref;
+      }
+      s.scale(z);
+      s.translate(pan_x, pan_y);
+      s.push();
+
+      // drawing
+      s.translate(-s.width/2, -s.height/2);
       s.drawPoints();
       s.drawLayout();
-      //drawTestfits(); // uncommment to show all possible locations when adding a word
+      s.drawTestfits();
       s.drawWords();
+
+      s.pop();
    }
 
    s.drawPoints = () => {
       s.stroke(0);
       s.noFill();
-      for (let x=0; x<=max_x; x++) {
-         for (let y=0; y<=max_y; y++) {
+      for (let x=0; x<=width; x++) {
+         for (let y=0; y<=height; y++) {
             s.point(x*square_size, y*square_size);
          }
       }
    }
 
    s.drawLayout = () => {
-      s.textSize(0.2*square_size);
-      for (let x=0; x<max_x; x++) {
-         for (let y=0; y<max_y; y++) {
-            if (grid[x][y].id1 >= 0) {
+      s.textSize(0.4*square_size);
+      for (let x=0; x<width; x++) {
+         for (let y=0; y<height; y++) {
+            if (grid[x][y].letter != ' ') {
                s.stroke(0);
                s.noFill();
                s.rect(x*square_size, y*square_size, square_size, square_size);
@@ -61,8 +123,8 @@ const crossword_p5 = (s) => {
 
    s.drawTestfits = () => {
       s.noStroke();
-      for (let x=0; x<max_x; x++) {
-         for (let y=0; y<max_y; y++) {
+      for (let x=0; x<width; x++) {
+         for (let y=0; y<height; y++) {
             let a = grid[x][y].testfit;
             if (a > 0) {
                s.fill(255,0,0,a);
@@ -76,9 +138,11 @@ const crossword_p5 = (s) => {
       s.noStroke();
       s.fill(0);
       s.textSize(0.8*square_size);
-      for (let x=0; x<max_x; x++) {
-         for (let y=0; y<max_y; y++) {
-            s.text(grid[x][y].letter, x*square_size+2*square_size/3, y*square_size+2*square_size/3);
+      for (let x=0; x<width; x++) {
+         for (let y=0; y<height; y++) {
+            if(grid[x][y].solved) {
+               s.text(grid[x][y].letter, x*square_size+2*square_size/3, y*square_size+2*square_size/3);
+            }
          }
       }
    }
@@ -97,6 +161,7 @@ class Word {
       this.word = word;
       this.clue = clue;
       this.solved = false;
+      this.testfit = false;
       // square number and direction in order to label the clue (ie: "14 down" or "12 across")
       this.label = label;
       this.horizontal = horizontal;
@@ -159,6 +224,7 @@ function load(game) {
          game.words[i].horizontal,
          game.words[i].clue);
       w.solved = game.words[i].solved;
+      w.testfit = game.words[i].testfit;
       words.push(w);
 
       // update label_index

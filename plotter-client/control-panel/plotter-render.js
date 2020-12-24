@@ -1,8 +1,8 @@
 
 const plotter_p5 = (s) => {
 
-   let canvas_width = 700;
-   let canvas_height = 200;
+   let canvas_width = 750;
+   let canvas_height = 550;
 
    s.setup = () => {
 
@@ -21,7 +21,7 @@ const plotter_p5 = (s) => {
          let x2 = draw_log[i+1].x;
          let y1 = draw_log[i].y;
          let y2 = draw_log[i+1].y;
-         let c = draw_log[i].drawing ? 255 : 150;
+         let c = draw_log[i].drawing ? 255 : 30;
          let w = draw_log[i].drawing ? 2 : 1;
          s.strokeWeight(w);
          s.stroke(0,0,255, c);
@@ -33,7 +33,7 @@ const plotter_p5 = (s) => {
          let x2 = draw_buffer[i+1].x;
          let y1 = draw_buffer[i].y;
          let y2 = draw_buffer[i+1].y;
-         let c = draw_buffer[i].drawing ? 255 : 150;
+         let c = draw_buffer[i].drawing ? 255 : 30;
          let w = draw_buffer[i].drawing ? 2 : 1;
          s.strokeWeight(w);
          s.stroke(255,0,255, c);
