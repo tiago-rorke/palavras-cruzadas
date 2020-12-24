@@ -194,43 +194,54 @@ cp_socket.on('connection', (socket) => {
    socket.on('update_drawing', () => {
       updatePlotterRender();
    });
-   socket.on('draw', async (text, text_height, text_spacing) => {
-      let x = 20;
-      let y = 20;
+
+   socket.on('draw_text', async (x, y, text, text_height, text_spacing) => {
       let buf = plotter.draw_buffer.length;
-
-      /*
-      plotter.beginDraw();
-      plotter.vertex(10,10);
-      plotter.vertex(10,30);
-      plotter.vertex(30,30);
-      plotter.vertex(30,10);
-      plotter.vertex(10,10);
-      plotter.endDraw();
-      plotter.beginDraw();
-      plotter.vertex(40,10);
-      plotter.vertex(40,30);
-      plotter.vertex(60,30);
-      plotter.vertex(60,10);
-      plotter.vertex(40,10);
-      plotter.endDraw();
-      */
-      //drawChar(char, x, y, text_height);
-      //drawText(text, x, y, text_height, text_spacing);
-      //drawGridlines(x, y, scale, horizontal_first)
-
-      //drawChar('H', 100, 100, 10);
-      //drawText('HELLO MY NAME IS MIMI', 20, 20, 5, 0.15);
-
-      crossword.undrawGridlines();
-      drawGridlines(20, 20, text_height, true);
-      drawGridBounds(20, 20, text_height, false);
-
+      x = Number(x);
+      y = Number(y);
+      text_height = Number(text_height);
+      text_spacing = Number(text_spacing);
+      drawText(text, x, y, text_height, text_spacing);
       updatePlotterRender();
-
       buf = plotter.draw_buffer.length - buf;
       console.log(buf,'lines drawn to buffer');
-      //console.log(plotter.draw_log);
+   });
+
+   socket.on('draw_crossword', async (
+         x, y,
+         square_size,
+         text_height,
+         letter_x,
+         letter_y,
+         label_height,
+         label_x,
+         label_y,
+         label_spacing,
+         label_horizontal,
+         horizontal_first,
+         draw_unsolved
+      ) => {
+
+      x = Number(x);
+      y = Number(y);
+      square_size = Number(square_size);
+      text_height = Number(text_height);
+      label_height = Number(label_height);
+      letter_x = Number(letter_x);
+      letter_y = Number(letter_y);
+      label_x = Number(label_x);
+      label_y = Number(label_y);
+      label_spacing = Number(label_spacing);
+
+      let buf = plotter.draw_buffer.length;
+      drawGridBounds(x, y, square_size, false); // debugging only
+      crossword.undrawGridlines();
+      drawGridlines(x, y, square_size, horizontal_first);
+      drawLabels(x, y, square_size, label_height, label_x, label_y, label_spacing, label_horizontal);
+      drawLetters(x, y, square_size, text_height, letter_x, letter_y, draw_unsolved);
+      updatePlotterRender();
+      buf = plotter.draw_buffer.length - buf;
+      console.log(buf,'lines drawn to buffer');
    });
 
 });
@@ -298,18 +309,65 @@ function drawChar(char, x, y, scale) {
    }
 }
 
-function drawText(text, x, y, scale, spacing) {
+function drawText(text, x, y, text_height, spacing) {
    for(let i=0; i<text.length; i++) {
-      drawChar(text.charAt(i), x, y, scale);
-      x += (3*scale)*(1 + Number(spacing));
+      drawChar(text.charAt(i), x, y, text_height/4);
+      x += (3*text_height)*(1 + spacing);
    }
 }
 
-function drawWord(w, scale, text_height) {
-   for(let i=0; i<w.word.length; i++) {
-      // x = ? w.x ...
-      // y = ? w.y ...
-      drawChar(w.word.charAt(i), x, y, scale);
+function drawLetters(ox, oy, square_size, text_height, letter_x, letter_y, draw_unsolved) {
+
+   oy += crossword.height * square_size;
+
+   for (let y=0; y<crossword.height; y++) {
+      //process.stdout.write('|');
+      for (let x=0; x<crossword.width; x++) {
+         if(crossword.grid[x][y].solved || draw_unsolved) {
+            let a = crossword.grid[x][y].letter;
+            if(a != ' ') {
+               let cx = ox + x*square_size + square_size/2 + letter_x - text_height/4;
+               let cy = oy + -(y+1)*square_size + square_size/2 + letter_y - text_height/2;
+               //process.stdout.write(a);
+               drawChar(a, cx, cy, text_height/4);
+            } else {
+               //process.stdout.write('.');
+            }
+         } else {
+            //process.stdout.write('.');
+         }
+      }
+      //process.stdout.write('|' + '\n');
+   }
+
+}
+
+function drawLabels(ox, oy, square_size, label_height, label_x, label_y, label_spacing, label_horizontal) {
+
+   oy += crossword.height * square_size;
+
+   for (let y=0; y<crossword.height; y++) {
+      //process.stdout.write('|');
+      for (let x=0; x<crossword.width; x++) {
+         let n = crossword.grid[x][y].label;
+         if(n > 0) {
+            n = String(n);
+            let cx = ox + x*square_size + label_x;
+            let cy = oy + -y*square_size  - label_y - label_height;
+            for (let c=0; c<n.length; c++) {
+               if(label_horizontal) {
+                  cx += c * (3*label_height/4 * (1 + label_spacing));
+               } else {
+                  cy -= c * (label_height * (1 + label_spacing));
+               }
+               drawChar(n.charAt(c), cx, cy, label_height/4)
+            }
+            //process.stdout.write(String(n));
+         } else {
+            //process.stdout.write('.');
+         }
+      }
+      //process.stdout.write('|' + '\n');
    }
 }
 

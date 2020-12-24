@@ -189,13 +189,33 @@ $(function () {
       console.log('clear drawing');
       socket.emit('clear');
    }
-   let draw = document.getElementById('draw');
-   draw.onclick = () => {
-      let t = document.getElementById('draw_text').value
+   let draw_text = document.getElementById('draw_text');
+   draw_text.onclick = () => {
+      console.log('draw text');
+      let x = document.getElementById('draw_x').value
+      let y = document.getElementById('draw_y').value
+      let t = document.getElementById('text_input').value
       let h = document.getElementById('text_height').value
       let s = document.getElementById('text_spacing').value
-      console.log('draw text');
-      socket.emit('draw', t, h, s);
+      socket.emit('draw_text', x, y, t, h, s);
+   }
+   let draw_crossword = document.getElementById('draw_crossword');
+   draw_crossword.onclick = () => {
+      console.log('draw crossword');
+      let x = document.getElementById('draw_x').value
+      let y = document.getElementById('draw_y').value
+      let s = document.getElementById('square_size').value;
+      let t = document.getElementById('text_height').value;
+      let tx = document.getElementById('letter_x').value;
+      let ty = document.getElementById('letter_y').value;
+      let l = document.getElementById('label_height').value;
+      let lx = document.getElementById('label_x').value;
+      let ly = document.getElementById('label_y').value;
+      let ls = document.getElementById('label_spacing').value;
+      let lh = document.getElementById('label_horizontal').checked == true ? true : false;
+      let hf = document.getElementById('horizontal_first').checked == true ? true : false;
+      let du = document.getElementById('draw_unsolved').checked == true ? true : false;
+      socket.emit('draw_crossword', x, y, s, t, tx, ty, l, lx, ly, ls, lh, hf, du);
    }
 
    let update_button = document.getElementById('update');
