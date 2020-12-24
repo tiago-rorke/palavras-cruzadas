@@ -10,9 +10,9 @@ let down_delay = 300;
 let socket = io();
 
 window.onload = () => {
-   update_crossword();
    socket.emit('get_status');
    socket.emit('get_config');
+   socket.emit('update_drawing');
 };
 
 
@@ -181,8 +181,6 @@ $(function () {
 
    socket.on('update_drawing', (draw_buffer, draw_log) => {
       console.log('update drawing');
-      console.log(draw_buffer.length + ' : ' + draw_log.length);
-      //console.log(draw_log);
       plotter_render.update(draw_buffer, draw_log);
    });
 
@@ -200,45 +198,9 @@ $(function () {
       socket.emit('draw', t, h, s);
    }
 
-   // ------------ CROSSWORD------------ //
-
-   let new_word = document.getElementById('new_word');
-   new_word.onclick = () => {
-      console.log('adding new word')
-      socket.emit('new_word', 'plumbis', 'how is it made?');
-   }
-
    let update_button = document.getElementById('update');
    update_button.onclick = () => {
-      update_crossword();
+      socket.emit('update_drawing');
    }
 
-   socket.on("update", () => {
-      update_crossword();
-   });
-
-   socket.on("new_word_fail", () => {
-      console.log('failed to add new word');
-   });
-
 });
-
-
-function update_crossword() {
-
-   fetch("/data/game.json")
-   .then((res) => res.json())
-   .then((out) => {
-      // out.words.forEach((word) => {
-      //    console.log(word.word);
-      // });
-      init(out.grid.width, out.grid.height);
-      load(out);
-      crossword_render.update();
-      //printWordlist();
-      console.log('updated');
-   })
-   .catch((err) => {
-      throw err;
-   });
-}

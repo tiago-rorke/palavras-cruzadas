@@ -7,8 +7,7 @@
       <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
       <!-- <script src="./jquery-3.4.1.min.js"></script> -->
       <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.js"></script>
-      <script src="./control-panel.js"></script>
-      <script src="./crossword-render.js"></script>
+      <script src="./plotter-control.js"></script>
       <script src="./plotter-render.js"></script>
       <style>
         body {
@@ -24,7 +23,9 @@
       </style>
    </head>
    <body>
+      <a href="crossword.html">CROSSWORD</a><br />
       <h2>PLOTTER</h2>
+
 
       <span>state: </span>
       <strong><span id="status">?</span></strong><br />
@@ -45,6 +46,7 @@
       <input style="width:100px" id="text_height" type="number" value="5" /><span>  text height</span><br />
       <input style="width:100px" id="text_spacing" type="number" value="0.15" step="0.01"/><span>  text spacing</span><br />
       <br />
+      <button id="update" type="button">update</button>
       <button id="draw" type="button">draw</button>
       <button id="clear" type="button">clear</button><br />
       <div id="plotter_canvas" style="margin:20px"></div>
@@ -71,13 +73,6 @@
       <input style="width:100px" type="number" step="10"  id="up_delay"     /><span> before delay</span><br />
       <input style="width:100px" type="number" step="10"  id="down_delay"   /><span> after delay</span><br />
       <button id="set_config" type="button">set config</button><br />
-
-      <br /><hr><br />
-
-      <h2>CROSSWORD</h2>
-      <button id="update" type="button">update</button><br />
-      <button id="new_word" type="button">new word</button><br />
-      <div id="crossword_canvas" style="margin:20px" oncontextmenu="return false;"></div>
    </body>
 </html>
 

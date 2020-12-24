@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>Palavras Cruzadas Plotter</title>
+      <script src="/socket.io/socket.io.js"></script>
+      <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+      <!-- <script src="./jquery-3.4.1.min.js"></script> -->
+      <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.js"></script>
+      <script src="./crossword-control.js"></script>
+      <script src="./crossword-render.js"></script>
+      <style>
+        body {
+          font-family: sans-serif;
+          width: 800px;
+          margin: 50px auto;
+          line-height: 2em;
+          background: #ccc;
+        }
+        iframe {
+          background: #fff;
+        }
+      </style>
+   </head>
+   <body>
+      <a href="plotter.html">PLOTTER</a><br />
+      <h2>CROSSWORD</h2>
+
+      <button id="update" type="button">update</button><br />
+      <button id="new_game" type="button">new game</button><br />
+      <button id="new_word" type="button">new word</button><br />
+      <div id="crossword_canvas" style="margin:20px" oncontextmenu="return false;"></div>
+   </body>
+</html>
+
+
+
+
+
+
+

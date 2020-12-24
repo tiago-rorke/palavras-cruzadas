@@ -12,6 +12,7 @@ const crossword_p5 = (s) => {
    let canvas_width = 750;
    let canvas_height = 550;
 
+   // navigation
    let pan_x = 0;
    let pan_y = 0;
    let zoom = 0;
@@ -32,6 +33,8 @@ const crossword_p5 = (s) => {
       s.push();
       s.translate(s.width/2, s.height/2);
    }
+
+   // ---------------------- navigation ------------------------- //
 
    s.mouseDragged = () => {
       if(s.mouseX > 0 && s.mouseX < s.width &&
@@ -64,9 +67,7 @@ const crossword_p5 = (s) => {
       s.resetPanZoom();
    }
 
-   s.update = () => {
-      s.background(255);
-
+   s.updatePanZoom = () => {
       // transformations
       let z = 1 + 0.005* zoom;
       pzoom_ref = zoom_ref;
@@ -80,16 +81,22 @@ const crossword_p5 = (s) => {
          z = zoom_ref/pzoom_ref;
       }
       s.scale(z);
+      pan_x /= zoom_ref;
+      pan_y /= zoom_ref;
       s.translate(pan_x, pan_y);
-      s.push();
+   }
 
-      // drawing
+   // ---------------------- render ------------------------- //
+
+   s.update = () => {
+      s.background(255);
+      s.updatePanZoom();
+      s.push();
       s.translate(-s.width/2, -s.height/2);
       s.drawPoints();
       s.drawLayout();
       s.drawTestfits();
       s.drawWords();
-
       s.pop();
    }
 

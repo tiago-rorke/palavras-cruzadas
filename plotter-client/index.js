@@ -11,7 +11,7 @@ const app = express();
 app.use("/", express.static(__dirname + '/control-panel/'));
 app.use("/data/", express.static(__dirname + '/data/'));
 app.get('/', function (req, res){
-   res.sendFile(__dirname + '/control-panel/index.html');
+   res.sendFile(__dirname + '/control-panel/plotter.html');
 });
 
 // data files
@@ -88,9 +88,9 @@ cp_socket.on('connection', (socket) => {
 
    // ------- CROSSWORD ------- //
 
-   socket.on('update', () => {
-      console.log('update');
-      socket.emit('update');
+   socket.on('update_crossword', () => {
+      console.log('update crossword');
+      socket.emit('update_crossword');
    });
 
    socket.on('new_word', (word, clue) => {
@@ -191,10 +191,14 @@ cp_socket.on('connection', (socket) => {
       plotter.draw_log = [];
       updatePlotterRender();
    });
+   socket.on('update_drawing', () => {
+      updatePlotterRender();
+   });
    socket.on('draw', async (text, text_height, text_spacing) => {
       let x = 20;
       let y = 20;
-      console.log('draw to buffer');
+      let buf = plotter.draw_buffer.length;
+
       /*
       plotter.beginDraw();
       plotter.vertex(10,10);
@@ -223,6 +227,9 @@ cp_socket.on('connection', (socket) => {
       drawGridBounds(20, 20, text_height, false);
 
       updatePlotterRender();
+
+      buf = plotter.draw_buffer.length - buf;
+      console.log(buf,'lines drawn to buffer');
       //console.log(plotter.draw_log);
    });
 
@@ -306,16 +313,16 @@ function drawWord(w, scale, text_height) {
    }
 }
 
-function drawGridlines(x, y, scale, horizontal_first) {
+function drawGridlines(x, y, square_size, horizontal_first) {
 
-   y += crossword.height * scale;
-   //console.log(scale);
+   y += crossword.height * square_size;
+
    if(horizontal_first) {
-      drawGridlinesH(x, y, scale);
-      drawGridlinesV(x, y, scale);
+      drawGridlinesH(x, y, square_size);
+      drawGridlinesV(x, y, square_size);
    } else {
-      drawGridlinesV(x, y, scale);
-      drawGridlinesH(x, y, scale);
+      drawGridlinesV(x, y, square_size);
+      drawGridlinesH(x, y, square_size);
    }
 
 }
