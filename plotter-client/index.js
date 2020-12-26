@@ -18,6 +18,7 @@ app.get('/', function (req, res){
 const config_file = "./data/config.json"
 const game_file = "./data/game.json";
 let config;
+
 try {
    config = JSON.parse(fs.readFileSync(config_file, 'utf8'));
 } catch (err) {
@@ -39,6 +40,8 @@ let crossword = new Crossword(0,0);
 //crossword.init();
 
 const codefont = require('./codefont');
+
+loadConfig();
 
 
 // ----------------------------------------------------------------- //
@@ -153,37 +156,74 @@ cp_socket.on('connection', (socket) => {
       }
    });
 
-   // ------- DRAWING ------- //
+   // ------- CONFIG ------- //
 
-   socket.on('set_config', (config) => {
-      plotter.travel_speed = config.travel_speed;
-      plotter.draw_speed   = config.draw_speed;
-      plotter.up_pos       = config.up_pos;
-      plotter.down_pos     = config.down_pos;
-      plotter.up_delay     = config.up_delay;
-      plotter.down_delay   = config.down_delay;
-
-      /*
-      console.log("travel_speed:", plotter.travel_speed);
-      console.log("draw_speed:", plotter.draw_speed);
-      console.log("up_pos:", plotter.up_pos);
-      console.log("down_pos:", plotter.down_pos);
-      console.log("up_delay:", plotter.up_delay);
-      console.log("down_delay:", plotter.down_delay);
-      */
-   });
-
-   socket.on('get_config', () => {
-      console.log("get_config");
-      socket.emit('get_config', {
+   socket.on('load_config', () => {
+      console.log("load_config");
+      loadConfig();
+      socket.emit('load_config',  {
          travel_speed: plotter.travel_speed,
          draw_speed:   plotter.draw_speed,
          up_pos:       plotter.up_pos,
          down_pos:     plotter.down_pos,
          up_delay:     plotter.up_delay,
-         down_delay:   plotter.down_delay
+         down_delay:   plotter.down_delay,
+         draw_x:           config.drawing.x,
+         draw_y:           config.drawing.y,
+         square_size:      config.drawing.square_size,
+         text_height:      config.drawing.text_height,
+         text_spacing:     config.drawing.text_spacing,
+         letter_x:         config.drawing.letter_x,
+         letter_y:         config.drawing.letter_y,
+         label_height:     config.drawing.label_height,
+         label_x:          config.drawing.label_x,
+         label_y:          config.drawing.label_y,
+         label_spacing:    config.drawing.label_spacing,
+         label_horizontal: config.drawing.label_horizontal,
+         horizontal_first: config.drawing.horizontal_first,
+         draw_unsolved:    config.drawing.draw_unsolved,
+         page_width:       config.page.width,
+         page_height:      config.page.height,
+         page_scale:       config.page.scale
       });
    });
+
+   socket.on('save_config', (cp_config) => {
+      config.plotter.travel_speed = cp_config.travel_speed;
+      config.plotter.draw_speed   = cp_config.draw_speed;
+      config.plotter.up_pos       = cp_config.up_pos;
+      config.plotter.down_pos     = cp_config.down_pos;
+      config.plotter.up_delay     = cp_config.up_delay;
+      config.plotter.down_delay   = cp_config.down_delay;
+      config.drawing.x                = cp_config.draw_x;
+      config.drawing.y                = cp_config.draw_y;
+      config.drawing.square_size      = cp_config.square_size;
+      config.drawing.text_height      = cp_config.text_height;
+      config.drawing.text_spacing     = cp_config.text_spacing;
+      config.drawing.letter_x         = cp_config.letter_x;
+      config.drawing.letter_y         = cp_config.letter_y;
+      config.drawing.label_height     = cp_config.label_height;
+      config.drawing.label_x          = cp_config.label_x;
+      config.drawing.label_y          = cp_config.label_y;
+      config.drawing.label_spacing    = cp_config.label_spacing;
+      config.drawing.label_horizontal = cp_config.label_horizontal;
+      config.drawing.horizontal_first = cp_config.horizontal_first;
+      config.drawing.draw_unsolved    = cp_config.draw_unsolved;
+      config.page.width    = cp_config.page_width;
+      config.page.height    = cp_config.page_height;
+      config.page.scale    = cp_config.page_scale;
+
+      plotter.travel_speed = config.plotter.travel_speed;
+      plotter.draw_speed   = config.plotter.draw_speed;
+      plotter.up_pos       = config.plotter.up_pos;
+      plotter.down_pos     = config.plotter.down_pos;
+      plotter.up_delay     = config.plotter.up_delay;
+      plotter.down_delay   = config.plotter.down_delay;
+
+      saveConfig(config_file);
+   });
+
+   // ------- DRAWING ------- //
 
    socket.on('clear', () => {
       console.log("clear buffer");
@@ -195,57 +235,89 @@ cp_socket.on('connection', (socket) => {
       updatePlotterRender();
    });
 
-   socket.on('draw_text', async (x, y, text, text_height, text_spacing) => {
+   socket.on('draw_text', async (text) => {
       let buf = plotter.draw_buffer.length;
-      x = Number(x);
-      y = Number(y);
-      text_height = Number(text_height);
-      text_spacing = Number(text_spacing);
-      drawText(text, x, y, text_height, text_spacing);
+      drawText(
+         text,
+         config.drawing.x,
+         config.drawing.y,
+         config.drawing.text_height,
+         config.drawing.text_spacing
+         );
       updatePlotterRender();
       buf = plotter.draw_buffer.length - buf;
       console.log(buf,'lines drawn to buffer');
    });
 
-   socket.on('draw_crossword', async (
-         x, y,
-         square_size,
-         text_height,
-         letter_x,
-         letter_y,
-         label_height,
-         label_x,
-         label_y,
-         label_spacing,
-         label_horizontal,
-         horizontal_first,
-         draw_unsolved
-      ) => {
-
-      x = Number(x);
-      y = Number(y);
-      square_size = Number(square_size);
-      text_height = Number(text_height);
-      label_height = Number(label_height);
-      letter_x = Number(letter_x);
-      letter_y = Number(letter_y);
-      label_x = Number(label_x);
-      label_y = Number(label_y);
-      label_spacing = Number(label_spacing);
-
+   socket.on('draw_crossword', async () => {
       let buf = plotter.draw_buffer.length;
-      drawGridBounds(x, y, square_size, false); // debugging only
+      drawGridBounds(
+         config.drawing.x,
+         config.drawing.y,
+         config.drawing.square_size,
+         false
+         ); // debugging only
       crossword.undrawGridlines();
-      drawGridlines(x, y, square_size, horizontal_first);
-      drawLabels(x, y, square_size, label_height, label_x, label_y, label_spacing, label_horizontal);
-      drawLetters(x, y, square_size, text_height, letter_x, letter_y, draw_unsolved);
+      drawGridlines(
+         config.drawing.x,
+         config.drawing.y,
+         config.drawing.square_size,
+         config.drawing.horizontal_first
+         );
+      drawLabels(
+         config.drawing.x,
+         config.drawing.y,
+         config.drawing.square_size,
+         config.drawing.label_height,
+         config.drawing.label_x,
+         config.drawing.label_y,
+         config.drawing.label_spacing,
+         config.drawing.label_horizontal
+         );
+      drawLetters(
+         config.drawing.x,
+         config.drawing.y,
+         config.drawing.square_size,
+         config.drawing.text_height,
+         config.drawing.letter_x,
+         config.drawing.letter_y,
+         config.drawing.draw_unsolved
+         );
       updatePlotterRender();
       buf = plotter.draw_buffer.length - buf;
-      console.log(buf,'lines drawn to buffer');
+      console.log(buf, 'lines drawn to buffer');
    });
 
 });
 
+// ------------------------------ CONFIG ------------------------------ //
+
+function saveConfig(file) {
+   fs.writeFile(
+      file,
+      JSON.stringify(config, null, 1),
+      function (err) {
+         if (err) return console.log(err);
+      }
+   );
+   return true;
+}
+
+function loadConfig() {
+
+   try {
+      config = JSON.parse(fs.readFileSync(config_file, 'utf8'));
+   } catch (err) {
+      return console.log(err);
+   }
+
+   plotter.travel_speed = config.plotter.travel_speed;
+   plotter.draw_speed   = config.plotter.draw_speed;
+   plotter.up_pos       = config.plotter.up_pos;
+   plotter.down_pos     = config.plotter.down_pos;
+   plotter.up_delay     = config.plotter.up_delay;
+   plotter.down_delay   = config.plotter.down_delay;
+}
 
 // ------------------------------ GUI ------------------------------ //
 

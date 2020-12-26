@@ -4,12 +4,12 @@ const SerialPort = require('serialport')
 const { GrblStream } = require('grbl-stream')
 
 // default parameters
-const default_travel_speed = 8000;
-const default_draw_speed = 4000;
-const default_up_delay = 300;
-const default_down_delay = 300;
-const default_up_pos = 200;
-const default_down_pos = 700;
+// const default_travel_speed = 8000;
+// const default_draw_speed = 4000;
+// const default_up_delay = 300;
+// const default_down_delay = 300;
+// const default_up_pos = 200;
+// const default_down_pos = 700;
 
 /*
 console.log('help', await grbl.help())
@@ -28,12 +28,12 @@ internal.Plotter = class {
       this.connect(port, baud);
 		this.grbl = new GrblStream()
 
-      this.travel_speed = default_travel_speed;
-      this.draw_speed = default_draw_speed;
-      this.up_delay = default_up_delay;
-      this.down_delay = default_down_delay;
-      this.up_pos = default_up_pos;
-      this.down_pos = default_down_pos;
+      this.travel_speed;
+      this.draw_speed;
+      this.up_delay;
+      this.down_delay;
+      this.up_pos;
+      this.down_pos;
 
       this.draw_buffer = [];
       this.draw_log = [];

@@ -34,6 +34,18 @@
       <button id="unlock" type="button">unlock</button>
       <button id="reset" type="button">reset</button><br /><br />
 
+      <input style="width:100px" id="jog_dist"  type="number" value="20" step="5" /><span>  jog distance</span><br />
+      <button style="width: 100px" id="X-_Y+"   type="button">X- Y+</button>
+      <button style="width: 100px" id="Y+"      type="button">Y+</button>
+      <button style="width: 100px" id="X+_Y+"   type="button">X+ Y+</button><br />
+      <button style="width: 100px" id="X-"      type="button">X-</button>
+      <button style="width: 100px" id="X0_Y0"   type="button">X0 Y0</button>
+      <button style="width: 100px" id="X+"      type="button">X+</button><br />
+      <button style="width: 100px" id="X-_Y-"   type="button">X- Y-</button>
+      <button style="width: 100px" id="Y-"      type="button">Y-</button>
+      <button style="width: 100px" id="X+_Y-"   type="button">X+ Y-</button><br />
+      <button style="width: 310px" id="set_zero"type="button">set zero</button><br /><br />
+
       <input style="width:200px" id="gcode" type="text"/><br />
       <button id="send" type="button">send</button><br /><br />
 
@@ -48,7 +60,7 @@
       <br />
       <input style="width:100px" id="page_width" type="number" value="1000" step="10"/><span>  page width (mm)</span><br />
       <input style="width:100px" id="page_height" type="number" value="700" step="10"/><span>  page height (mm)</span><br />
-      <input style="width:100px" id="page_scale" type="number" value="1" step="0.1"/><span>  page render scale</span><br />
+      <input style="width:100px" id="page_scale" type="number" value="0.75" step="0.1"/><span>  page render scale (px/mm)</span><br />
       <button id="update_page" type="button">update page</button><br />
       <br />
       <button id="draw_crossword" type="button">draw crossword</button><br />
@@ -56,13 +68,15 @@
       <input style="width:200px" id="text_input" type="text"/><br />
       <button id="draw_text" type="button">draw text</button>
       <br /><br />
+      <hr style="border: 1px dashed"><br />
+      <button id="load_config" type="button">reload config</button>
+      <button id="save_config" type="button">save config</button><br /><br />
       <input style="width:100px" id="draw_x" type="number" value="20" /><span>  drawing x</span><br />
       <input style="width:100px" id="draw_y" type="number" value="20" /><span>  drawing y</span><br />
       <br />
+      <input style="width:100px" id="square_size" type="number" value="30" /><span>  square size</span><br />
       <input style="width:100px" id="text_height" type="number" value="15" /><span>  text height</span><br />
       <input style="width:100px" id="text_spacing" type="number" value="0.15" step="0.01"/><span>  text spacing</span><br />
-      <br /><br />
-      <input style="width:100px" id="square_size" type="number" value="30" /><span>  square size</span><br />
       <input style="width:100px" id="letter_x" type="number" value="0" /><span>  letter offset x</span><br />
       <input style="width:100px" id="letter_y" type="number" value="0" /><span>  letter offset y</span><br />
       <input style="width:100px" id="label_height" type="number" value="5" /><span>  number label height</span><br />
@@ -77,29 +91,13 @@
       <input type="radio" id="vertical_first" name="draw_order"><span>vertical lines first</span><br />
       <input type="checkbox" id="draw_unsolved" ><span>draw unsolved words</span>
       <br /><br />
-
-      <hr style="border: 1px dashed"><br />
-
-      <input style="width:100px" id="jog_dist"  type="number" value="20" step="5" /><span>  jog distance</span><br />
-      <button style="width: 100px" id="X-_Y+"   type="button">X- Y+</button>
-      <button style="width: 100px" id="Y+"      type="button">Y+</button>
-      <button style="width: 100px" id="X+_Y+"   type="button">X+ Y+</button><br />
-      <button style="width: 100px" id="X-"      type="button">X-</button>
-      <button style="width: 100px" id="X0_Y0"   type="button">X0 Y0</button>
-      <button style="width: 100px" id="X+"      type="button">X+</button><br />
-      <button style="width: 100px" id="X-_Y-"   type="button">X- Y-</button>
-      <button style="width: 100px" id="Y-"      type="button">Y-</button>
-      <button style="width: 100px" id="X+_Y-"   type="button">X+ Y-</button><br />
-      <button style="width: 310px" id="set_zero"type="button">set zero</button><br /><br />
-
-      <button id="get_config" type="button">get config</button><br />
       <input style="width:100px" type="number" step="100" id="travel_speed" /><span> travel speed</span><br />
       <input style="width:100px" type="number" step="100" id="draw_speed"   /><span> draw speed</span><br />
-      <input style="width:100px" type="number" step="10"  id="up_pos"       /><span> up pos</span><br   />
-      <input style="width:100px" type="number" step="10"  id="down_pos"     /><span> down pos</span><br   />
+      <input style="width:100px" type="number" step="10"  id="up_pos"       /><span> up pos</span><br />
+      <input style="width:100px" type="number" step="10"  id="down_pos"     /><span> down pos</span><br />
       <input style="width:100px" type="number" step="10"  id="up_delay"     /><span> before delay</span><br />
       <input style="width:100px" type="number" step="10"  id="down_delay"   /><span> after delay</span><br />
-      <button id="set_config" type="button">set config</button><br />
+      <br /><br />
    </body>
 </html>
 

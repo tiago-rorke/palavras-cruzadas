@@ -1,18 +1,12 @@
 "use strict";
 
-let travel_speed = 2000;
-let draw_speed = 4000;
-let up_pos = 200;
-let down_pos = 700;
-let up_delay = 300;
-let down_delay = 300;
-
 let socket = io();
 
 window.onload = () => {
    socket.emit('get_status');
-   socket.emit('get_config');
+   socket.emit('load_config');
    socket.emit('update_drawing');
+   updatePage();
 };
 
 
@@ -142,44 +136,65 @@ $(function () {
 
    // --------------- DRAW CONFIG ----------------- //
 
-   let get_config = document.getElementById('get_config');
-   get_config.onclick = () => {
+   let load_config = document.getElementById('load_config');
+   load_config.onclick = () => {
       console.log('[grbl] get config');
-      socket.emit('get_config');
+      socket.emit('load_config');
    }
 
-   socket.on('get_config', (config) => {
+   socket.on('load_config', (config) => {
       console.log('got config');
-      travel_speed = config.travel_speed;
-      draw_speed   = config.draw_speed;
-      up_pos       = config.up_pos;
-      down_pos     = config.down_pos;
-      up_delay     = config.up_delay;
-      down_delay   = config.down_delay;
-      document.getElementById('travel_speed').value = travel_speed;
-      document.getElementById('draw_speed').value   = draw_speed;
-      document.getElementById('up_pos').value       = up_pos;
-      document.getElementById('down_pos').value     = down_pos;
-      document.getElementById('up_delay').value     = up_delay;
-      document.getElementById('down_delay').value   = down_delay;
+      document.getElementById('travel_speed').value       = config.travel_speed;
+      document.getElementById('draw_speed').value         = config.draw_speed;
+      document.getElementById('up_pos').value             = config.up_pos;
+      document.getElementById('down_pos').value           = config.down_pos;
+      document.getElementById('up_delay').value           = config.up_delay;
+      document.getElementById('down_delay').value         = config.down_delay;
+      document.getElementById('draw_x').value             = config.draw_x;
+      document.getElementById('draw_y').value             = config.draw_y;
+      document.getElementById('square_size').value        = config.square_size;
+      document.getElementById('text_height').value        = config.text_height;
+      document.getElementById('text_spacing').value       = config.text_spacing;
+      document.getElementById('letter_x').value           = config.letter_x;
+      document.getElementById('letter_y').value           = config.letter_y;
+      document.getElementById('label_height').value       = config.label_height;
+      document.getElementById('label_x').value            = config.label_x;
+      document.getElementById('label_y').value            = config.label_y;
+      document.getElementById('label_spacing').value      = config.label_spacing;
+      document.getElementById('label_horizontal').checked = config.label_horizontal;
+      document.getElementById('label_vertical').checked   = !config.label_horizontal;
+      document.getElementById('horizontal_first').checked = config.horizontal_first;
+      document.getElementById('vertical_first').checked   = !config.horizontal_first;
+      document.getElementById('draw_unsolved').checked    = config.draw_unsolved;
+      document.getElementById('page_width').value         = config.page_width;
+      document.getElementById('page_height').value        = config.page_height;
+      document.getElementById('page_scale').value         = config.page_scale;
    });
 
-   let set_config = document.getElementById('set_config');
-   set_config.onclick = () => {
-      travel_speed = document.getElementById('travel_speed').value;
-      draw_speed   = document.getElementById('draw_speed').value;
-      up_pos       = document.getElementById('up_pos').value;
-      down_pos     = document.getElementById('down_pos').value;
-      up_delay     = document.getElementById('up_delay').value;
-      down_delay   = document.getElementById('down_delay').value;
-      console.log('set_config');
-      socket.emit('set_config', {
-         travel_speed: travel_speed,
-         draw_speed:   draw_speed,
-         up_pos:       up_pos,
-         down_pos:     down_pos,
-         up_delay:     up_delay,
-         down_delay:   down_delay
+   let save_config = document.getElementById('save_config');
+   save_config.onclick = () => {
+      console.log('save_config');
+      socket.emit('save_config', {
+         travel_speed     : Number(document.getElementById('travel_speed').value),
+         draw_speed       : Number(document.getElementById('draw_speed').value),
+         up_pos           : Number(document.getElementById('up_pos').value),
+         down_pos         : Number(document.getElementById('down_pos').value),
+         up_delay         : Number(document.getElementById('up_delay').value),
+         down_delay       : Number(document.getElementById('down_delay').value),
+         draw_x           : Number(document.getElementById('draw_x').value),
+         draw_y           : Number(document.getElementById('draw_y').value),
+         square_size      : Number(document.getElementById('square_size').value),
+         text_height      : Number(document.getElementById('text_height').value),
+         text_spacing     : Number(document.getElementById('text_spacing').value),
+         letter_x         : Number(document.getElementById('letter_x').value),
+         letter_y         : Number(document.getElementById('letter_y').value),
+         label_height     : Number(document.getElementById('label_height').value),
+         label_x          : Number(document.getElementById('label_x').value),
+         label_y          : Number(document.getElementById('label_y').value),
+         label_spacing    : Number(document.getElementById('label_spacing').value),
+         label_horizontal : document.getElementById('label_horizontal').checked,
+         horizontal_first : document.getElementById('horizontal_first').checked,
+         draw_unsolved    : document.getElementById('draw_unsolved').checked
       });
    }
 
@@ -199,30 +214,12 @@ $(function () {
    let draw_text = document.getElementById('draw_text');
    draw_text.onclick = () => {
       console.log('draw text');
-      let x = document.getElementById('draw_x').value
-      let y = document.getElementById('draw_y').value
-      let t = document.getElementById('text_input').value
-      let h = document.getElementById('text_height').value
-      let s = document.getElementById('text_spacing').value
-      socket.emit('draw_text', x, y, t, h, s);
+      socket.emit('draw_text', document.getElementById('text_input').value);
    }
    let draw_crossword = document.getElementById('draw_crossword');
    draw_crossword.onclick = () => {
       console.log('draw crossword');
-      let x = document.getElementById('draw_x').value
-      let y = document.getElementById('draw_y').value
-      let s = document.getElementById('square_size').value;
-      let t = document.getElementById('text_height').value;
-      let tx = document.getElementById('letter_x').value;
-      let ty = document.getElementById('letter_y').value;
-      let l = document.getElementById('label_height').value;
-      let lx = document.getElementById('label_x').value;
-      let ly = document.getElementById('label_y').value;
-      let ls = document.getElementById('label_spacing').value;
-      let lh = document.getElementById('label_horizontal').checked == true ? true : false;
-      let hf = document.getElementById('horizontal_first').checked == true ? true : false;
-      let du = document.getElementById('draw_unsolved').checked == true ? true : false;
-      socket.emit('draw_crossword', x, y, s, t, tx, ty, l, lx, ly, ls, lh, hf, du);
+      socket.emit('draw_crossword');
    }
 
    let update_button = document.getElementById('update');
