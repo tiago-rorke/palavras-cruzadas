@@ -69,6 +69,8 @@ $(function () {
       socket.emit('send', gcode);
    }
 
+   // --------------- JOGGING ----------------- //
+
    let left_up = document.getElementById('X-_Y+');
    left_up.onclick = () => {
       let d = document.getElementById('jog_dist').value
@@ -138,6 +140,8 @@ $(function () {
       socket.emit('send', gcode);
    }
 
+   // --------------- DRAW CONFIG ----------------- //
+
    let get_config = document.getElementById('get_config');
    get_config.onclick = () => {
       console.log('[grbl] get config');
@@ -184,6 +188,9 @@ $(function () {
       plotter_render.update(draw_buffer, draw_log);
    });
 
+   // --------------- DRAWING ----------------- //
+
+
    let clear = document.getElementById('clear');
    clear.onclick = () => {
       console.log('clear drawing');
@@ -223,4 +230,20 @@ $(function () {
       socket.emit('update_drawing');
    }
 
+   // --------------- VISUALISATION ----------------- //
+
+   let update_page = document.getElementById('update_page');
+   update_page.onclick = () => {
+      updatePage();
+      socket.emit('update_drawing');
+   }
+
 });
+
+function updatePage() {
+   let w = document.getElementById('page_width').value
+   let h = document.getElementById('page_height').value
+   let s = document.getElementById('page_scale').value
+   console.log('update page', s, w, h);
+   plotter_render.initCanvas(s, w, h);
+}

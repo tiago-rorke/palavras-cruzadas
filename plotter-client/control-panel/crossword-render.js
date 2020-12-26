@@ -11,10 +11,10 @@ const crossword_p5 = (s) => {
    let square_size;
 
    s.setup = () => {
-      s.init_canvas(30, 100,100);
+      s.initCanvas(30, 100,100);
    }
 
-   s.init_canvas = (sq, w, h) => {
+   s.initCanvas = (sq, w, h) => {
       let canvas = s.createCanvas(w * sq, h * sq);
       canvas.parent('crossword_canvas');
       canvas.style('border', '20px solid white');

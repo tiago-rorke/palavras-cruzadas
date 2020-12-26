@@ -1,12 +1,21 @@
 
 const plotter_p5 = (s) => {
 
-   let canvas_width = 750;
-   let canvas_height = 550;
+   let scale;
 
    s.setup = () => {
+      //s.initCanvas(scale, 750, 550);
+      let w = document.getElementById('page_width').value
+      let h = document.getElementById('page_height').value
+      let rs = document.getElementById('page_scale').value
+      s.initCanvas(rs, w, h);
+      scale = rs;
+   }
 
-      let canvas = s.createCanvas(canvas_width, canvas_height);
+   s.initCanvas = (rs, w, h) => {
+      //console.log(rs, w, h);
+      let canvas = s.createCanvas(w*rs, h*rs);
+      scale = rs;
       canvas.parent('plotter_canvas');
 
       // graphics
@@ -17,27 +26,27 @@ const plotter_p5 = (s) => {
    s.update = (draw_buffer, draw_log) => {
       s.background(255);
       for(let i=0; i<draw_log.length-1; i++) {
-         let x1 = draw_log[i].x;
-         let x2 = draw_log[i+1].x;
-         let y1 = draw_log[i].y;
-         let y2 = draw_log[i+1].y;
+         let x1 = scale * draw_log[i].x;
+         let x2 = scale * draw_log[i+1].x;
+         let y1 = scale * draw_log[i].y;
+         let y2 = scale * draw_log[i+1].y;
          let c = draw_log[i].drawing ? 255 : 30;
          let w = draw_log[i].drawing ? 2 : 1;
          s.strokeWeight(w);
          s.stroke(0,0,255, c);
          // invert y to move origin to bottom left corner
-         s.line(x1, canvas_height - y1, x2, canvas_height - y2);
+         s.line(x1, s.height - y1, x2, s.height - y2);
       }
       for(let i=0; i<draw_buffer.length-1; i++) {
-         let x1 = draw_buffer[i].x;
-         let x2 = draw_buffer[i+1].x;
-         let y1 = draw_buffer[i].y;
-         let y2 = draw_buffer[i+1].y;
+         let x1 = scale *draw_buffer[i].x;
+         let x2 = scale *draw_buffer[i+1].x;
+         let y1 = scale *draw_buffer[i].y;
+         let y2 = scale *draw_buffer[i+1].y;
          let c = draw_buffer[i].drawing ? 255 : 30;
          let w = draw_buffer[i].drawing ? 2 : 1;
          s.strokeWeight(w);
          s.stroke(255,0,255, c);
-         s.line(x1, canvas_height - y1, x2, canvas_height - y2);
+         s.line(x1, s.height - y1, x2, s.height - y2);
       }
    }
 }
