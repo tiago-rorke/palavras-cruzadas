@@ -210,7 +210,7 @@ cp_socket.on('connection', (socket) => {
       config.drawing.horizontal_first = cp_config.horizontal_first;
       config.drawing.draw_unsolved    = cp_config.draw_unsolved;
       config.page.width    = cp_config.page_width;
-      config.page.height    = cp_config.page_height;
+      config.page.height   = cp_config.page_height;
       config.page.scale    = cp_config.page_scale;
 
       plotter.travel_speed = config.plotter.travel_speed;

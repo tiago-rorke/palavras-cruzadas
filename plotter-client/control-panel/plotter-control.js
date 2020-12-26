@@ -144,6 +144,7 @@ $(function () {
 
    socket.on('load_config', (config) => {
       console.log('got config');
+      console.log(config);
       document.getElementById('travel_speed').value       = config.travel_speed;
       document.getElementById('draw_speed').value         = config.draw_speed;
       document.getElementById('up_pos').value             = config.up_pos;
@@ -194,7 +195,10 @@ $(function () {
          label_spacing    : Number(document.getElementById('label_spacing').value),
          label_horizontal : document.getElementById('label_horizontal').checked,
          horizontal_first : document.getElementById('horizontal_first').checked,
-         draw_unsolved    : document.getElementById('draw_unsolved').checked
+         draw_unsolved    : document.getElementById('draw_unsolved').checked,
+         page_width       : Number(document.getElementById('page_width').value),
+         page_height      : Number(document.getElementById('page_height').value),
+         page_scale       : Number(document.getElementById('page_scale').value)
       });
    }
 
