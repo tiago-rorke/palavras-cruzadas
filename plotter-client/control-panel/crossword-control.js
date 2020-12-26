@@ -49,6 +49,7 @@ function update_crossword() {
       //    console.log(word.word);
       // });
       init(out.grid.width, out.grid.height);
+      crossword_render.init_canvas(30, out.grid.width, out.grid.height)
       load(out);
       crossword_render.update();
       //printWordlist();

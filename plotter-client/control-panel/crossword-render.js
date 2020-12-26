@@ -8,96 +8,35 @@
 const crossword_p5 = (s) => {
 
    // square size at 0 zoom
-   let square_size = 30;
-   let canvas_width = 750;
-   let canvas_height = 550;
-
-   // navigation
-   let pan_x = 0;
-   let pan_y = 0;
-   let zoom = 0;
-   let zoom_ref = 1;
-   let min_zoom = 0.1;
-   let max_zoom = 5;
+   let square_size;
 
    s.setup = () => {
-      let canvas = s.createCanvas(canvas_width, canvas_height);
+      s.init_canvas(30, 100,100);
+   }
+
+   s.init_canvas = (sq, w, h) => {
+      let canvas = s.createCanvas(w * sq, h * sq);
       canvas.parent('crossword_canvas');
+      canvas.style('border', '20px solid white');
+
+      square_size = sq;
 
       // graphics
       s.strokeWeight(2);
       s.textAlign(s.CENTER, s.CENTER);
       s.smooth();
 
-      // save 0 transformation position
-      s.push();
-      s.translate(s.width/2, s.height/2);
    }
 
-   // ---------------------- navigation ------------------------- //
-
-   s.mouseDragged = () => {
-      if(s.mouseX > 0 && s.mouseX < s.width &&
-         s.mouseY > 0 && s.mouseY < s.height) {
-         if (s.mouseButton === s.LEFT) {
-            pan_x += s.mouseX - s.pmouseX;
-            pan_y += s.mouseY - s.pmouseY;
-         } else {
-            zoom += (s.mouseY - s.pmouseY);
-         }
-      }
-      return false;
-   }
-
-   s.mouseReleased = () => {
-      s.update();
-      pan_x = 0;
-      pan_y = 0;
-      zoom = 0;
-   }
-
-   s.resetPanZoom = () => {
-      s.pop();
-      zoom_ref = 1;
-      s.push();
-      s.translate(s.width/2, s.height/2);
-      s.update();
-   }
-   s.keyPressed = () => {
-      s.resetPanZoom();
-   }
-
-   s.updatePanZoom = () => {
-      // transformations
-      let z = 1 + 0.005* zoom;
-      pzoom_ref = zoom_ref;
-      zoom_ref *= z;
-      if (zoom_ref > max_zoom) {
-         zoom_ref = max_zoom;
-         z = zoom_ref/pzoom_ref;
-      }
-      if (zoom_ref < min_zoom) {
-         zoom_ref = min_zoom;
-         z = zoom_ref/pzoom_ref;
-      }
-      s.scale(z);
-      pan_x /= zoom_ref;
-      pan_y /= zoom_ref;
-      s.translate(pan_x, pan_y);
-   }
 
    // ---------------------- render ------------------------- //
 
    s.update = () => {
       s.background(255);
-      s.updatePanZoom();
-      s.push();
-      s.translate(-s.width/2, -s.height/2);
       s.drawPoints();
       s.drawLayout();
       s.drawTestfits();
       s.drawWords();
-      s.pop();
    }
 
    s.drawPoints = () => {
