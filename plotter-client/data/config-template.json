@@ -1,10 +1,37 @@
 {
-   "server_url": "http://localhost:3000",
-   "plotter": {
-      "port": "/dev/ttyUSB0",
-      "baud": 115200
-   },
-   "control_panel": {
-      "port": 8000
-   }
+ "server_url": "http://localhost:3000",
+ "control_panel": {
+  "port": 8000
+ },
+ "plotter": {
+  "port": "/dev/ttyACM0",
+  "baud": 115200,
+  "travel_speed": 8000,
+  "draw_speed": 3000,
+  "up_pos": 200,
+  "down_pos": 700,
+  "up_delay": 300,
+  "down_delay": 300
+ },
+ "drawing": {
+  "x": 20,
+  "y": 20,
+  "square_size": 12,
+  "text_height": 6.5,
+  "text_spacing": 0.15,
+  "letter_x": 1,
+  "letter_y": 0,
+  "label_height": 2.5,
+  "label_x": 1.3,
+  "label_y": 1.2,
+  "label_spacing": 0.35,
+  "label_horizontal": false,
+  "horizontal_first": true,
+  "draw_unsolved": true
+ },
+ "page": {
+  "width": 1000,
+  "height": 700,
+  "scale": 0.5
+ }
 }

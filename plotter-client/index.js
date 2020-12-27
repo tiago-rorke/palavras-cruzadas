@@ -43,6 +43,8 @@ const codefont = require('./codefont');
 
 loadConfig();
 
+let random_words = fs.readFileSync('./data/random_words.txt').toString().split('\n');
+
 
 // ----------------------------------------------------------------- //
 
@@ -96,18 +98,46 @@ cp_socket.on('connection', (socket) => {
       socket.emit('update_crossword');
    });
 
-   socket.on('new_word', (word, clue) => {
+   socket.on('new_game', (w, h) => {
+      console.log('new game', w, h);
+      crossword = new Crossword(w,h);
+      crossword.save(game_file);
+      cp_socket.emit('update_crossword');
+   });
+
+   socket.on('add_word', (word, clue) => {
       console.log('adding new word: ', word + '; ' + clue)
       let w = crossword.newWord(word,clue)
       if(w != false) {
          console.log(w);
          crossword.save(game_file);
-         cp_socket.emit('update');
+         cp_socket.emit('update_crossword');
       } else {
          console.log('failed to add new word');
-         cp_socket.emit('new_word_fail');
+         cp_socket.emit('add_word_fail', word);
       }
 
+   });
+
+   socket.on('add_random', (n) => {
+      console.log("adding " + n + " random words");
+      cp_socket.emit('update_crossword');
+      let c = 0;
+      for(let i=0; i<n; i++) {
+         let a = Math.floor(Math.random() * random_words.length);
+         let word = random_words[a];
+         console.log(a, word);
+         let w = crossword.newWord(word,'####')
+         if(w != false) {
+            console.log(w);
+            c++;
+         } else {
+            console.log('failed to add:', word);
+         }
+      }
+      console.log('successfully added ' + c + ' of ' + n + ' words');
+      crossword.save(game_file);
+      cp_socket.emit('update_crossword');
    });
 
    // ------- GBRL ------- //
@@ -384,7 +414,7 @@ function drawChar(char, x, y, scale) {
 function drawText(text, x, y, text_height, spacing) {
    for(let i=0; i<text.length; i++) {
       drawChar(text.charAt(i), x, y, text_height/4);
-      x += (3*text_height)*(1 + spacing);
+      x += (text_height/2)*(1 + spacing);
    }
 }
 
@@ -427,10 +457,10 @@ function drawLabels(ox, oy, square_size, label_height, label_x, label_y, label_s
             let cx = ox + x*square_size + label_x;
             let cy = oy + -y*square_size  - label_y - label_height;
             for (let c=0; c<n.length; c++) {
-               if(label_horizontal) {
-                  cx += c * (3*label_height/4 * (1 + label_spacing));
-               } else {
-                  cy -= c * (label_height * (1 + label_spacing));
+               if(label_horizontal && c>0) {
+                  cx +=  (3*label_height/4 * (1 + label_spacing));
+               } else if (c>0) {
+                  cy -=  (label_height * (1 + label_spacing));
                }
                drawChar(n.charAt(c), cx, cy, label_height/4)
             }
@@ -462,9 +492,9 @@ function drawGridlinesH(px, py, s) {
    //console.log('hrz ' + crossword.gridlines_h.length);
    //console.log('vrt ' + crossword.gridlines_v.length);
 
-   for (let y=0; y<crossword.height; y++) {
+   for (let y=0; y<crossword.height+1; y++) {
       //process.stdout.write('|');
-      for (let x=0; x<crossword.width+1; x++) {
+      for (let x=0; x<crossword.width; x++) {
 
          //console.log(crossword.gridlines_h[x][y]);
          if(crossword.gridlines_h[x][y] > 0) {
@@ -479,7 +509,7 @@ function drawGridlinesH(px, py, s) {
             }
 
             // if ending a line
-            if(x == crossword.width || (x < crossword.width && crossword.gridlines_h[x+1][y] < 1)) {
+            if(x == crossword.width-1 || (x < crossword.width-1 && crossword.gridlines_h[x+1][y] < 1)) {
                let vx = (x+1)*s + px;
                let vy = -y*s + py;
                plotter.vertex(vx, vy);
@@ -498,8 +528,8 @@ function drawGridlinesH(px, py, s) {
 
 function drawGridlinesV(px, py, s) {
 
-   for (let x=0; x<crossword.width; x++) {
-      for (let y=0; y<crossword.height+1; y++) {
+   for (let x=0; x<crossword.width+1; x++) {
+      for (let y=0; y<crossword.height; y++) {
          if(crossword.gridlines_v[x][y] > 0) {
 
             // if starting a line
@@ -511,7 +541,7 @@ function drawGridlinesV(px, py, s) {
             }
 
             // if ending a line
-            if(y == crossword.height || (y < crossword.height && crossword.gridlines_v[x][y+1] < 1)) {
+            if(y == crossword.height-1 || (y < crossword.height-1 && crossword.gridlines_v[x][y+1] < 1)) {
                let vx = x*s + px;
                let vy = -(y+1)*s + py;
                plotter.vertex(vx, vy);

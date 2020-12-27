@@ -10,6 +10,8 @@ const crossword_p5 = (s) => {
    // square size at 0 zoom
    let square_size;
 
+   let draw_unsolved = false;
+
    s.setup = () => {
       s.initCanvas(30, 100,100);
    }
@@ -35,8 +37,13 @@ const crossword_p5 = (s) => {
       s.background(255);
       s.drawPoints();
       s.drawLayout();
-      s.drawTestfits();
+      //s.drawTestfits();
       s.drawWords();
+   }
+
+   s.toggleUnsolved = () => {
+      draw_unsolved = !draw_unsolved;
+      return(draw_unsolved);
    }
 
    s.drawPoints = () => {
@@ -67,6 +74,8 @@ const crossword_p5 = (s) => {
       }
    }
 
+   /*
+   // this doesn't work, because testfit is in the grid, not the word
    s.drawTestfits = () => {
       s.noStroke();
       for (let x=0; x<width; x++) {
@@ -79,16 +88,22 @@ const crossword_p5 = (s) => {
          }
       }
    }
+   */
 
    s.drawWords = () => {
       s.noStroke();
-      s.fill(0);
       s.textSize(0.8*square_size);
       for (let x=0; x<width; x++) {
          for (let y=0; y<height; y++) {
-            if(grid[x][y].solved) {
+            if(!grid[x][y].solved) {
+               s.fill(255,0,255);
+            } else {
+               s.fill(0);
+            }
+            if(grid[x][y].solved || draw_unsolved) {
                s.text(grid[x][y].letter, x*square_size+2*square_size/3, y*square_size+2*square_size/3);
             }
+
          }
       }
    }
@@ -107,7 +122,7 @@ class Word {
       this.word = word;
       this.clue = clue;
       this.solved = false;
-      this.testfit = false;
+      //this.testfit = false;
       // square number and direction in order to label the clue (ie: "14 down" or "12 across")
       this.label = label;
       this.horizontal = horizontal;
@@ -170,7 +185,7 @@ function load(game) {
          game.words[i].horizontal,
          game.words[i].clue);
       w.solved = game.words[i].solved;
-      w.testfit = game.words[i].testfit;
+      //w.testfit = game.words[i].testfit; // testfit is in the grid, not the word
       words.push(w);
 
       // update label_index

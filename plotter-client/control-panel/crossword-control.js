@@ -9,10 +9,13 @@ window.onload = () => {
 
 $(function () {
 
-   let new_word = document.getElementById('new_word');
-   new_word.onclick = () => {
-      console.log('adding new word')
-      socket.emit('new_word', 'plumbis', 'how is it made?');
+   let add_word = document.getElementById('add_word');
+   add_word.onclick = () => {
+      let word = document.getElementById('new_word').value;
+      if(word.length > 0) {
+         console.log('adding new word', word)
+         socket.emit('add_word', word, '####');
+      }
    }
 
    let update_button = document.getElementById('update');
@@ -24,17 +27,33 @@ $(function () {
    new_game.onclick = () => {
       if (window.confirm("Are you sure you want to delete everything and start a new game?")) {
          console.log("new game");
-         socket.emit('new_game');
-         update_crossword();
+         socket.emit('new_game', Number(document.getElementById('width').value), Number(document.getElementById('height').value));
       }
+   }
+
+   let toggle_show_unsolved = document.getElementById('toggle_show_unsolved');
+   toggle_show_unsolved.onclick = () => {
+      if(crossword_render.toggleUnsolved()) {
+         toggle_show_unsolved.textContent = "hide unsolved words";
+      } else {
+         toggle_show_unsolved.textContent = "show unsolved words";
+      }
+      crossword_render.update();
+   }
+
+   let add_random = document.getElementById('add_random');
+   add_random.onclick = () => {
+      let n = Number(document.getElementById('random_count').value);
+      console.log("adding " + n + " random words");
+      socket.emit('add_random', n);
    }
 
    socket.on('update_crossword', () => {
       update_crossword();
    });
 
-   socket.on("new_word_fail", () => {
-      console.log('failed to add new word');
+   socket.on("add_word_fail", (word) => {
+      console.log('failed to add new word', word);
    });
 
 });

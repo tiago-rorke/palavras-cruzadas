@@ -138,13 +138,13 @@ $(function () {
 
    let load_config = document.getElementById('load_config');
    load_config.onclick = () => {
-      console.log('[grbl] get config');
+      console.log('get config');
       socket.emit('load_config');
    }
 
    socket.on('load_config', (config) => {
       console.log('got config');
-      console.log(config);
+      //console.log(config);
       document.getElementById('travel_speed').value       = config.travel_speed;
       document.getElementById('draw_speed').value         = config.draw_speed;
       document.getElementById('up_pos').value             = config.up_pos;
