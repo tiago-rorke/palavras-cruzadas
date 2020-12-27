@@ -114,7 +114,8 @@ internal.Plotter = class {
    // beginPlot, endPlot, vertexPlot; sends drawing commmands to plotter
 
    async beginPlot(x, y) {
-      this.vertex(x,y);
+      //this.vertex(x,y);
+      await vertexPlot(x,y);
       await this.send("M3 S" + this.down_pos);
       await this.send("G4 P" + this.down_delay/1000);
       this.plotting = true;
