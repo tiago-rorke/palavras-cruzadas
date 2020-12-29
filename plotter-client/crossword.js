@@ -7,7 +7,7 @@ const fs = require("fs");
 // ---------------------- objects ------------------------- //
 
 class Word {
-   constructor(word, x, y, label, horizontal, clue) {
+   constructor(word, x, y, label, horizontal, clue, entrytime, player) {
       this.word = word;
       this.clue = clue;
       this.solved = false;
@@ -18,10 +18,10 @@ class Word {
 
       this.x = x;  // coordinates of first letter
       this.y = y;
-      this.entrytime;      // when word was added
+      this.entrytime = entrytime;      // when word was added
       this.solvedtime = -1;     // when word was solved
       this.solveattempts = 0;  // number of tries at solving the clue
-      this.player;
+      this.player = player;
 
       // used for drawing with plotter
       // -1 = nothing to draw
@@ -158,6 +158,7 @@ internal.Crossword = class {
          w.entrytime = game.words[i].entrytime;
          w.solvedtime = game.words[i].solvedtime;
          w.solveattempts = game.words[i].solveattempts;
+         w.player = game.words[i].player;
          this.words.push(w);
 
          // update label_index
@@ -615,7 +616,8 @@ internal.Crossword = class {
          }
       }
       this.updateGridlines();
-      let word = new Word(word_string, x, y, label, horizontal, clue_string);
+      let word = new Word(word_string, x, y, label, horizontal, clue_string, entrytime, player);
+      console.log(word);
       this.words.push(word);
       // console.log(label, horizontal?'across':'down',':', clue_string);
       // console.log('total words:', this.words.length);

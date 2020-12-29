@@ -29,16 +29,19 @@ $(function () {
    home.onclick = () => {
       console.log('[grbl] home');
       socket.emit('home');
+      socket.emit('get_status');
    }
    let unlock = document.getElementById('unlock');
    unlock.onclick = () => {
       console.log('[grbl] unlock');
       socket.emit('unlock');
+      socket.emit('get_status');
    }
    let reset = document.getElementById('reset');
    reset.onclick = () => {
       console.log('[grbl] reset');
       socket.emit('reset');
+      socket.emit('get_status');
    }
    let play = document.getElementById('play');
    play.onclick = () => {
@@ -121,16 +124,38 @@ $(function () {
       console.log('[grbl] jog', gcode);
       socket.emit('send', gcode);
    }
+   let to_zero = document.getElementById('X0_Y0');
+   to_zero.onclick = () => {
+      let gcode = ['G90','G0 X0 Y0'];
+      console.log('[grbl] go to work zero', gcode);
+      socket.emit('send', gcode);
+   }
    let set_zero = document.getElementById('set_zero');
    set_zero.onclick = () => {
       let gcode = ['G10 P1 L20 X0 Y0'];
       console.log('[grbl] set work zero', gcode);
       socket.emit('send', gcode);
    }
-   let to_zero = document.getElementById('X0_Y0');
-   to_zero.onclick = () => {
-      let gcode = ['G90','G0 X0 Y0'];
-      console.log('[grbl] go to work zero', gcode);
+
+   let pen_up = document.getElementById('pen_up');
+   pen_up.onclick = () => {
+      let gcode = [
+         'G91',
+         'G1 X0 F5000',
+         'M3 S' + document.getElementById('up_pos').value
+         ];
+      console.log('[grbl] pen up', gcode);
+      socket.emit('send', gcode);
+   }
+
+   let pen_down = document.getElementById('pen_down');
+   pen_down.onclick = () => {
+      let gcode = [
+         'G91',
+         'G1 X0 F5000',
+         'M3 S' + document.getElementById('down_pos').value
+         ];
+      console.log('[grbl] pen down', gcode);
       socket.emit('send', gcode);
    }
 

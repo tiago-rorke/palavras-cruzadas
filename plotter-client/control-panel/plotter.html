@@ -46,6 +46,12 @@
       <button style="width: 100px" id="X+_Y-"   type="button">X+ Y-</button><br />
       <button style="width: 310px" id="set_zero"type="button">set zero</button><br /><br />
 
+      <button style="width: 150px" id="pen_up"type="button">pen down</button>
+      <button style="width: 150px" id="pen_down"type="button">pen up</button><br />
+      <input style="width:132px" type="number" step="10" id="down_pos"/>
+      <input style="width:132px" type="number" step="10" id="up_pos"/>
+      <br /><br />
+
       <input style="width:200px" id="gcode" type="text"/><br />
       <button id="send" type="button">send</button><br /><br />
 
@@ -70,7 +76,9 @@
       <br /><br />
       <hr style="border: 1px dashed"><br />
       <button id="load_config" type="button">reload config</button>
-      <button id="save_config" type="button">save config</button><br /><br />
+      <button id="save_config" type="button">save config</button>
+      <br /><br />
+      <div style="width: 50%; float: left;">
       <input style="width:100px" id="draw_x" type="number" value="20" /><span>  drawing x</span><br />
       <input style="width:100px" id="draw_y" type="number" value="20" /><span>  drawing y</span><br />
       <br />
@@ -91,13 +99,14 @@
       <input type="radio" id="vertical_first" name="draw_order"><span>vertical lines first</span><br />
       <input type="checkbox" id="draw_unsolved" ><span>draw unsolved words</span>
       <br /><br />
+      <br /><br />
+      </div>
+      <div style="width: 50%; float: right;">
       <input style="width:100px" type="number" step="100" id="travel_speed" /><span> travel speed</span><br />
       <input style="width:100px" type="number" step="100" id="draw_speed"   /><span> draw speed</span><br />
-      <input style="width:100px" type="number" step="10"  id="up_pos"       /><span> up pos</span><br />
-      <input style="width:100px" type="number" step="10"  id="down_pos"     /><span> down pos</span><br />
-      <input style="width:100px" type="number" step="10"  id="up_delay"     /><span> before delay</span><br />
-      <input style="width:100px" type="number" step="10"  id="down_delay"   /><span> after delay</span><br />
-      <br /><br />
+      <input style="width:100px" type="number" step="10"  id="down_delay"   /><span> down delay</span><br />
+      <input style="width:100px" type="number" step="10"  id="up_delay"     /><span> up delay</span><br />
+      </div>
    </body>
 </html>
 

@@ -115,7 +115,7 @@ internal.Plotter = class {
 
    async beginPlot(x, y) {
       //this.vertex(x,y);
-      await vertexPlot(x,y);
+      await this.vertexPlot(x,y);
       await this.send("M3 S" + this.down_pos);
       await this.send("G4 P" + this.down_delay/1000);
       this.plotting = true;
@@ -128,7 +128,7 @@ internal.Plotter = class {
    }
 
    async vertexPlot(x, y) {
-      if (this.drawing) {
+      if (this.plotting) {
          await this.send("G1 X" + x + " Y" + y + " F" + this.draw_speed);
          //await this.send("G1 F" + this.draw_speed);
          //await this.grbl.position({ x: x, y: y })
