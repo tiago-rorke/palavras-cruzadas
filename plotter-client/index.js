@@ -281,13 +281,13 @@ cp_socket.on('connection', (socket) => {
 
    socket.on('draw_crossword', async () => {
       let buf = plotter.draw_buffer.length;
-      drawGridBounds(
+      drawGridBounds( // debugging only
          config.drawing.x,
          config.drawing.y,
          config.drawing.square_size,
          false
-         ); // debugging only
-      crossword.undrawGridlines();
+         );
+      //crossword.undrawGridlines();
       drawGridlines(
          config.drawing.x,
          config.drawing.y,
@@ -425,7 +425,7 @@ function drawLetters(ox, oy, square_size, text_height, letter_x, letter_y, draw_
    for (let y=0; y<crossword.height; y++) {
       //process.stdout.write('|');
       for (let x=0; x<crossword.width; x++) {
-         if(crossword.grid[x][y].solved || draw_unsolved) {
+         if((crossword.grid[x][y].solved || draw_unsolved) && crossword.grid[x][y].letter_drawing > 0) {
             let a = crossword.grid[x][y].letter;
             if(a != ' ') {
                let cx = ox + x*square_size + square_size/2 + letter_x - text_height/4;
@@ -435,6 +435,7 @@ function drawLetters(ox, oy, square_size, text_height, letter_x, letter_y, draw_
             } else {
                //process.stdout.write('.');
             }
+            crossword.grid[x][y].letter_drawing = 0;
          } else {
             //process.stdout.write('.');
          }
@@ -452,7 +453,7 @@ function drawLabels(ox, oy, square_size, label_height, label_x, label_y, label_s
       //process.stdout.write('|');
       for (let x=0; x<crossword.width; x++) {
          let n = crossword.grid[x][y].label;
-         if(n > 0) {
+         if(crossword.grid[x][y].label_drawing > 0) {
             n = String(n);
             let cx = ox + x*square_size + label_x;
             let cy = oy + -y*square_size  - label_y - label_height;
@@ -465,6 +466,7 @@ function drawLabels(ox, oy, square_size, label_height, label_x, label_y, label_s
                drawChar(n.charAt(c), cx, cy, label_height/4)
             }
             //process.stdout.write(String(n));
+            crossword.grid[x][y].label_drawing = 0;
          } else {
             //process.stdout.write('.');
          }

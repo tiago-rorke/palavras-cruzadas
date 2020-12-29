@@ -129,6 +129,7 @@ internal.Plotter = class {
 
    async vertexPlot(x, y) {
       if (this.plotting) {
+         await this.send("G90"); // always make sure we are in absolute coords
          await this.send("G1 X" + x + " Y" + y + " F" + this.draw_speed);
          //await this.send("G1 F" + this.draw_speed);
          //await this.grbl.position({ x: x, y: y })
