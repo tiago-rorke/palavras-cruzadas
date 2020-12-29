@@ -161,7 +161,7 @@ $(function () {
 
    // --------------- DRAW CONFIG ----------------- //
 
-   let load_config = document.getElementsByClassName('load_config');
+   let load_config = document.getElementById('load_config');
    load_config.onclick = () => {
       console.log('get config');
       socket.emit('load_config');
@@ -197,7 +197,7 @@ $(function () {
       document.getElementById('page_scale').value         = config.page_scale;
    });
 
-   let save_config = document.getElementsByClassName('save_config');
+   let save_config = document.getElementById('save_config');
    save_config.onclick = () => {
       console.log('save_config');
       socket.emit('save_config', {
