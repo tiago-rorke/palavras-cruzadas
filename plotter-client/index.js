@@ -216,7 +216,6 @@ cp_socket.on('connection', (socket) => {
          page_height:      config.page.height,
          page_scale:       config.page.scale
       });
-      console.log(plotter.draw_speed, plotter.travel_speed);
    });
 
    socket.on('save_config', (cp_config) => {
