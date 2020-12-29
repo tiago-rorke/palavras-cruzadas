@@ -102,6 +102,7 @@ cp_socket.on('connection', (socket) => {
       console.log('new game', w, h);
       crossword = new Crossword(w,h);
       crossword.save(game_file);
+      crossword.update();
       cp_socket.emit('update_crossword');
    });
 
@@ -111,6 +112,7 @@ cp_socket.on('connection', (socket) => {
       if(w != false) {
          console.log(w);
          crossword.save(game_file);
+         crossword.update();
          cp_socket.emit('update_crossword');
       } else {
          console.log('failed to add new word');
@@ -137,6 +139,7 @@ cp_socket.on('connection', (socket) => {
       }
       console.log('successfully added ' + c + ' of ' + n + ' words');
       crossword.save(game_file);
+      crossword.update();
       cp_socket.emit('update_crossword');
    });
 
@@ -281,12 +284,13 @@ cp_socket.on('connection', (socket) => {
 
    socket.on('draw_crossword', async () => {
       let buf = plotter.draw_buffer.length;
-      drawGridBounds( // debugging only
+      // debugging only
+      /*drawGridBounds(
          config.drawing.x,
          config.drawing.y,
          config.drawing.square_size,
          false
-         );
+         );*/
       //crossword.undrawGridlines();
       drawGridlines(
          config.drawing.x,
@@ -425,13 +429,14 @@ function drawLetters(ox, oy, square_size, text_height, letter_x, letter_y, draw_
    for (let y=0; y<crossword.height; y++) {
       //process.stdout.write('|');
       for (let x=0; x<crossword.width; x++) {
-         if((crossword.grid[x][y].solved || draw_unsolved) && crossword.grid[x][y].letter_drawing > 0) {
-            let a = crossword.grid[x][y].letter;
-            if(a != ' ') {
+         let a = crossword.grid[x][y].letter;
+         if(a != ' ') {
+            if((crossword.grid[x][y].solved && crossword.grid[x][y].letter_drawing > 0) ||
+               (draw_unsolved && crossword.grid[x][y].letter_drawing != 0)) {
                let cx = ox + x*square_size + square_size/2 + letter_x - text_height/4;
                let cy = oy + -(y+1)*square_size + square_size/2 + letter_y - text_height/2;
-               //process.stdout.write(a);
                drawChar(a, cx, cy, text_height/4);
+               //process.stdout.write(a);
             } else {
                //process.stdout.write('.');
             }
@@ -442,7 +447,6 @@ function drawLetters(ox, oy, square_size, text_height, letter_x, letter_y, draw_
       }
       //process.stdout.write('|' + '\n');
    }
-
 }
 
 function drawLabels(ox, oy, square_size, label_height, label_x, label_y, label_spacing, label_horizontal) {

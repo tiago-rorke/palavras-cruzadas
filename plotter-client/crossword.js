@@ -173,9 +173,7 @@ internal.Crossword = class {
          if(w.label > this.label_index) {
             this.label_index = w.label;
          }
-
-         this.updateGrid();
-         this.updateGridlines();
+         this.update();
       }
 
       // not sure if should be an async function...
@@ -207,6 +205,12 @@ internal.Crossword = class {
          }
       );
       return true;
+   }
+
+   update() {
+      console.log("updating grid etc...");
+      this.updateGrid();
+      this.updateGridlines();
    }
 
    // update the crossword grid based on words[]
@@ -603,40 +607,10 @@ internal.Crossword = class {
 
    // add a new word at location x,y
    addWord(word_string, x, y, horizontal, label, clue_string, entrytime, player) {
-      let id = this.words.length;
-      let l = word_string.length;
-      if(this.grid[x][y].label <= 0){
-         this.grid[x][y].label = label;
-      } else {
-         if(this.grid[x][y].label != label) {
-            return console.log('something went wrong: trying relabel a square', err);
-         }
-      }
-      for (let i=0; i<l; i++) {
-         if (horizontal) {
-            if(x+i < this.width) {
-               if (this.grid[x+i][y].id1 >= 0) {
-                  this.grid[x+i][y].id2 = id;
-               } else {
-                  this.grid[x+i][y].id1 = id;
-               }
-               this.grid[x+i][y].letter = word_string.charAt(i);
-            }
-         } else {
-            if(y+i < this.height) {
-               if (this.grid[x][y+i].id1 >= 0) {
-                  this.grid[x][y+i].id2 = id;
-               } else {
-                  this.grid[x][y+i].id1 = id;
-               }
-               this.grid[x][y+i].letter = word_string.charAt(i);
-            }
-         }
-      }
-      this.updateGridlines();
       let word = new Word(word_string, x, y, label, horizontal, clue_string, entrytime, player);
       console.log(word);
       this.words.push(word);
+      this.update();
       // console.log(label, horizontal?'across':'down',':', clue_string);
       // console.log('total words:', this.words.length);
       return word;
