@@ -48,6 +48,7 @@ $(function () {
       console.log('[grbl] play');
       socket.emit('play');
    }
+   /*
    let feed_hold = document.getElementById('feed_hold');
    feed_hold.onclick = () => {
       console.log('[grbl] feed hold');
@@ -57,7 +58,7 @@ $(function () {
    resume.onclick = () => {
       console.log('[grbl] resume');
       socket.emit('resume');
-   }
+   }*/
 
    let send = document.getElementById('send');
    send.onclick = () => {

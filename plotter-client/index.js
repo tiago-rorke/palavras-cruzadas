@@ -80,7 +80,8 @@ server_socket.on('connect', () => {
       .catch((err) => {
          console.log(err);
       });
-      crossword.load(game_file);
+      let game = fs.readFileSync(game_file, 'utf8');
+      crossword.load(game);
       drawCrossword();
    });
 });

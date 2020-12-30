@@ -27,7 +27,8 @@
   "label_spacing": 0.35,
   "label_horizontal": false,
   "horizontal_first": true,
-  "draw_unsolved": true
+  "draw_unsolved": false,
+  "autoplay": true
  },
  "page": {
   "width": 1000,
