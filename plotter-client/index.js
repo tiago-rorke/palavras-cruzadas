@@ -81,6 +81,7 @@ server_socket.on('connect', () => {
          console.log(err);
       });
       crossword.load(game_file);
+      drawCrossword();
    });
 });
 
@@ -215,6 +216,7 @@ cp_socket.on('connection', (socket) => {
          label_horizontal: config.drawing.label_horizontal,
          horizontal_first: config.drawing.horizontal_first,
          draw_unsolved:    config.drawing.draw_unsolved,
+         autoplay:         config.drawing.autoplay,
          page_width:       config.page.width,
          page_height:      config.page.height,
          page_scale:       config.page.scale
@@ -242,6 +244,7 @@ cp_socket.on('connection', (socket) => {
       config.drawing.label_horizontal = cp_config.label_horizontal;
       config.drawing.horizontal_first = cp_config.horizontal_first;
       config.drawing.draw_unsolved    = cp_config.draw_unsolved;
+      config.drawing.autoplay         = cp_config.autoplay;
       config.page.width    = cp_config.page_width;
       config.page.height   = cp_config.page_height;
       config.page.scale    = cp_config.page_scale;
@@ -283,43 +286,7 @@ cp_socket.on('connection', (socket) => {
    });
 
    socket.on('draw_crossword', async () => {
-      let buf = plotter.draw_buffer.length;
-      // debugging only
-      /*drawGridBounds(
-         config.drawing.x,
-         config.drawing.y,
-         config.drawing.square_size,
-         false
-         );*/
-      //crossword.undrawGridlines();
-      drawGridlines(
-         config.drawing.x,
-         config.drawing.y,
-         config.drawing.square_size,
-         config.drawing.horizontal_first
-         );
-      drawLabels(
-         config.drawing.x,
-         config.drawing.y,
-         config.drawing.square_size,
-         config.drawing.label_height,
-         config.drawing.label_x,
-         config.drawing.label_y,
-         config.drawing.label_spacing,
-         config.drawing.label_horizontal
-         );
-      drawLetters(
-         config.drawing.x,
-         config.drawing.y,
-         config.drawing.square_size,
-         config.drawing.text_height,
-         config.drawing.letter_x,
-         config.drawing.letter_y,
-         config.drawing.draw_unsolved
-         );
-      updatePlotterRender();
-      buf = plotter.draw_buffer.length - buf;
-      console.log(buf, 'lines drawn to buffer');
+      drawCrossword();
    });
 
 });
@@ -384,6 +351,48 @@ async function drawFromBuffer() {
 
 // ---------------------------- DRAWING ---------------------------- //
 
+function drawCrossword() {
+   let buf = plotter.draw_buffer.length;
+   // debugging only
+   /*drawGridBounds(
+      config.drawing.x,
+      config.drawing.y,
+      config.drawing.square_size,
+      false
+      );*/
+   //crossword.undrawGridlines();
+   drawGridlines(
+      config.drawing.x,
+      config.drawing.y,
+      config.drawing.square_size,
+      config.drawing.horizontal_first
+      );
+   drawLabels(
+      config.drawing.x,
+      config.drawing.y,
+      config.drawing.square_size,
+      config.drawing.label_height,
+      config.drawing.label_x,
+      config.drawing.label_y,
+      config.drawing.label_spacing,
+      config.drawing.label_horizontal
+      );
+   drawLetters(
+      config.drawing.x,
+      config.drawing.y,
+      config.drawing.square_size,
+      config.drawing.text_height,
+      config.drawing.letter_x,
+      config.drawing.letter_y,
+      config.drawing.draw_unsolved
+      );
+   updatePlotterRender();
+   buf = plotter.draw_buffer.length - buf;
+   console.log(buf, 'lines drawn to buffer');
+   if(autoplay) {
+      drawFromBuffer();
+   }
+}
 
 function drawChar(char, x, y, scale) {
 

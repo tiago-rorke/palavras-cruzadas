@@ -192,6 +192,7 @@ $(function () {
       document.getElementById('horizontal_first').checked = config.horizontal_first;
       document.getElementById('vertical_first').checked   = !config.horizontal_first;
       document.getElementById('draw_unsolved').checked    = config.draw_unsolved;
+      document.getElementById('autoplay').checked         = config.autoplay;
       document.getElementById('page_width').value         = config.page_width;
       document.getElementById('page_height').value        = config.page_height;
       document.getElementById('page_scale').value         = config.page_scale;
@@ -221,6 +222,7 @@ $(function () {
          label_horizontal : document.getElementById('label_horizontal').checked,
          horizontal_first : document.getElementById('horizontal_first').checked,
          draw_unsolved    : document.getElementById('draw_unsolved').checked,
+         autoplay         : document.getElementById('autoplay').checked,
          page_width       : Number(document.getElementById('page_width').value),
          page_height      : Number(document.getElementById('page_height').value),
          page_scale       : Number(document.getElementById('page_scale').value)
