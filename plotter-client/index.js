@@ -50,7 +50,7 @@ let random_words = fs.readFileSync('./data/random_words.txt').toString().split('
 
 try {
    let game = fs.readFileSync(game_file, 'utf8');
-   crossword.load(game);
+   crossword.load(game, true);
    // crossword.printWords(false);
    // crossword.printLabels();
    // crossword.printWordlist();
@@ -81,7 +81,7 @@ server_socket.on('connect', () => {
          console.log(err);
       });
       let game = fs.readFileSync(game_file, 'utf8');
-      crossword.load(game);
+      crossword.load(game, false);
       drawCrossword();
    });
 });
@@ -286,7 +286,7 @@ cp_socket.on('connection', (socket) => {
       console.log(buf,'lines drawn to buffer');
    });
 
-   socket.on('draw_crossword', async () => {
+   socket.on('draw_crossword', () => {
       drawCrossword();
    });
 
@@ -390,7 +390,7 @@ function drawCrossword() {
    updatePlotterRender();
    buf = plotter.draw_buffer.length - buf;
    console.log(buf, 'lines drawn to buffer');
-   if(autoplay) {
+   if(config.drawing.autoplay) {
       drawFromBuffer();
    }
 }
@@ -447,10 +447,10 @@ function drawLetters(ox, oy, square_size, text_height, letter_x, letter_y, draw_
                let cy = oy + -(y+1)*square_size + square_size/2 + letter_y - text_height/2;
                drawChar(a, cx, cy, text_height/4);
                //process.stdout.write(a);
+               crossword.grid[x][y].letter_drawing = 0;
             } else {
                //process.stdout.write('.');
             }
-            crossword.grid[x][y].letter_drawing = 0;
          } else {
             //process.stdout.write('.');
          }
@@ -466,8 +466,8 @@ function drawLabels(ox, oy, square_size, label_height, label_x, label_y, label_s
    for (let y=0; y<crossword.height; y++) {
       //process.stdout.write('|');
       for (let x=0; x<crossword.width; x++) {
-         let n = crossword.grid[x][y].label;
          if(crossword.grid[x][y].label_drawing > 0) {
+            let n = crossword.grid[x][y].label;
             n = String(n);
             let cx = ox + x*square_size + label_x;
             let cy = oy + -y*square_size  - label_y - label_height;

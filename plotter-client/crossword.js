@@ -102,7 +102,7 @@ internal.Crossword = class {
    init(w, h) {
       this.width = w;
       this.height = h;
-      this.words = []
+      this.words = [];
       this.grid = [];
       this.gridlines_h = [];
       this.gridlines_v = [];
@@ -136,45 +136,48 @@ internal.Crossword = class {
    }
 
    // initialise the words and grid arrays and fill them with the data from the json file
-   load(file) {
+   load(file, init) {
 
-      let game;
+      let data;
       try {
-         game = JSON.parse(file);
+         data = JSON.parse(file);
       } catch (err) {
          return console.log(err);
       }
 
-      // initialise
-      this.init(game.grid.width, game.grid.height);
+      if(init){
+         this.init(data.grid.width, data.grid.height);
+      }
 
       // load metadata
-      this.start_time = game.start_time;
-      this.end_time = game.end_time;
+      this.start_time = data.start_time;
+      this.end_time = data.end_time;
 
-      for(let i=0; i<game.words.length; i++) {
+      this.words = [];
+
+      for(let i=0; i<data.words.length; i++) {
 
          // create new word objects
          let w = new Word(
-            game.words[i].word,
-            game.words[i].x,
-            game.words[i].y,
-            game.words[i].label,
-            game.words[i].horizontal,
-            game.words[i].clue);
-         w.solved = game.words[i].solved;
-         w.entrytime = game.words[i].entrytime;
-         w.solvedtime = game.words[i].solvedtime;
-         w.solveattempts = game.words[i].solveattempts;
-         w.player = game.words[i].player;
+            data.words[i].word,
+            data.words[i].x,
+            data.words[i].y,
+            data.words[i].label,
+            data.words[i].horizontal,
+            data.words[i].clue);
+         w.solved = data.words[i].solved;
+         w.entrytime = data.words[i].entrytime;
+         w.solvedtime = data.words[i].solvedtime;
+         w.solveattempts = data.words[i].solveattempts;
+         w.player = data.words[i].player;
          this.words.push(w);
 
          // update label_index
          if(w.label > this.label_index) {
             this.label_index = w.label;
          }
-         this.update();
       }
+      this.update();
 
       // not sure if should be an async function...
       // return new Promise((resolve, reject) => {
