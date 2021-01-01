@@ -135,7 +135,7 @@ internal.Crossword = class {
       }
    }
 
-   // initialise the words and grid arrays and fill them with the data from the json file
+   // load data from the json file into the word and grid arrays
    load(file, init) {
 
       let data;
@@ -145,6 +145,7 @@ internal.Crossword = class {
          return console.log(err);
       }
 
+      // if we want to start a new game
       if(init){
          this.init(data.grid.width, data.grid.height);
       }
@@ -211,7 +212,7 @@ internal.Crossword = class {
    }
 
    update() {
-      console.log("updating grid etc...");
+      console.log("updating grid");
       this.updateGrid();
       this.updateGridlines();
    }
@@ -354,8 +355,8 @@ internal.Crossword = class {
             this.label_index++;
             return this.addWord(
                word_string,
-               Math.round(Math.random(0,this.width-l)),
-               Math.round(Math.random(0,this.height-l)),
+               Math.round(Math.random() * this.width-l),
+               Math.round(Math.random() * this.height-l),
                dir,
                this.label_index,
                clue_string,
@@ -413,7 +414,7 @@ internal.Crossword = class {
       if(highscore >= 0) {
          let new_position;
          if(best_positions.length > 1) {
-            let i = Math.floor(Math.random(0,best_positions.length));
+            let i = Math.floor(Math.random() * best_positions.length);
             new_position = best_positions[i];
          } else {
             new_position = best_positions[0];
@@ -611,7 +612,7 @@ internal.Crossword = class {
    // add a new word at location x,y
    addWord(word_string, x, y, horizontal, label, clue_string, entrytime, player) {
       let word = new Word(word_string, x, y, label, horizontal, clue_string, entrytime, player);
-      console.log(word);
+      //console.log(word);
       this.words.push(word);
       this.update();
       // console.log(label, horizontal?'across':'down',':', clue_string);

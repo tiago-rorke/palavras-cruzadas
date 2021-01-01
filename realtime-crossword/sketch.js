@@ -466,7 +466,7 @@ function drawGame() {
    background(255);
    drawPoints();
    drawLayout();
-   //drawTestfits(); // uncommment to show all possible locations when adding a word
+   drawTestfits(); // uncommment to show all possible locations when adding a word
    drawWords();
 }
 
@@ -502,7 +502,7 @@ function drawTestfits() {
    noStroke();
    for (let x=0; x<max_x; x++) {
       for (let y=0; y<max_y; y++) {
-         let a = grid[x][y].testfit;
+         let a = grid[x][y].testfit * 0.2;
          if (a > 0) {
             fill(255,0,0,a);
             rect(x*square_size, y*square_size, square_size, square_size);

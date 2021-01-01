@@ -46,23 +46,20 @@ loadConfig();
 let random_words = fs.readFileSync('./data/random_words.txt').toString().split('\n');
 
 
-// ----------------------------------------------------------------- //
+// --------------------------- STARTUP ----------------------------- //
 
 try {
    let game = fs.readFileSync(game_file, 'utf8');
    crossword.load(game, true);
-   // crossword.printWords(false);
-   // crossword.printLabels();
-   // crossword.printWordlist();
-   // plotter.home();
-   // crossword.newWord("help","i'm trapped in a crossword");
-   // crossword.save(game_file);
-   // cp_socket.emit('update');
-   //process.stdout.write('\n');
 } catch (err) {
-   console.log(err);
+   if (err.code === 'ENOENT') {
+      console.log('no game file found, starting a new game');
+      newGame(30,20);
+   } else {
+      console.error(err);
+      throw err;
+   }
 }
-
 
 
 // -------------------- SERVER <> CLIENT COMMS --------------------- //
@@ -71,18 +68,20 @@ try {
 server_socket.on('connect', () => {
    console.log('connected to server');
 
-   server_socket.on("fileChanged", () => {
-      fetch(config.server_url + "/game.json")
+   server_socket.on("fileChanged", async () => {
+      await fetch(config.server_url + "/game.json")
       .then((res) => res.json())
       .then((out) => {
          fs.writeFileSync(game_file, JSON.stringify(out,null,1));
       })
+      .then(() => {
+         let game = fs.readFileSync(game_file, 'utf8');
+         crossword.load(game, false);
+         drawCrossword();
+      })
       .catch((err) => {
          console.log(err);
       });
-      let game = fs.readFileSync(game_file, 'utf8');
-      crossword.load(game, false);
-      drawCrossword();
    });
 });
 
@@ -101,11 +100,7 @@ cp_socket.on('connection', (socket) => {
    });
 
    socket.on('new_game', (w, h) => {
-      console.log('new game', w, h);
-      crossword = new Crossword(w,h);
-      crossword.save(game_file);
-      crossword.update();
-      cp_socket.emit('update_crossword');
+      newGame(w,h);
    });
 
    socket.on('add_word', (word, clue) => {
@@ -320,6 +315,17 @@ function loadConfig() {
    plotter.up_delay     = config.plotter.up_delay;
    plotter.down_delay   = config.plotter.down_delay;
 }
+
+// --------------------------- CROSSWORD --------------------------- //
+
+function newGame(w, h) {
+   console.log('new game', w, h);
+   crossword = new Crossword(w,h);
+   crossword.save(game_file);
+   crossword.update();
+   cp_socket.emit('update_crossword');
+}
+
 
 // ------------------------------ GUI ------------------------------ //
 

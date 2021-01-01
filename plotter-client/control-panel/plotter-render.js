@@ -25,6 +25,8 @@ const plotter_p5 = (s) => {
 
    s.update = (draw_buffer, draw_log) => {
       s.background(255);
+
+      // drawn lines
       for(let i=0; i<draw_log.length-1; i++) {
          let x1 = scale * draw_log[i].x;
          let x2 = scale * draw_log[i+1].x;
@@ -37,11 +39,13 @@ const plotter_p5 = (s) => {
          // invert y to move origin to bottom left corner
          s.line(x1, s.height - y1, x2, s.height - y2);
       }
+
+      // lines still to draw
       for(let i=0; i<draw_buffer.length-1; i++) {
-         let x1 = scale *draw_buffer[i].x;
-         let x2 = scale *draw_buffer[i+1].x;
-         let y1 = scale *draw_buffer[i].y;
-         let y2 = scale *draw_buffer[i+1].y;
+         let x1 = scale * draw_buffer[i].x;
+         let x2 = scale * draw_buffer[i+1].x;
+         let y1 = scale * draw_buffer[i].y;
+         let y2 = scale * draw_buffer[i+1].y;
          let c = draw_buffer[i].drawing ? 255 : 30;
          let w = draw_buffer[i].drawing ? 2 : 1;
          s.strokeWeight(w);
