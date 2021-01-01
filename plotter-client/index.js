@@ -18,6 +18,7 @@ app.get('/', function (req, res){
 const config_file = "./data/config.json"
 const game_file = "./data/game.json";
 const grid_file = "./data/game_grid.json";
+const drawing_file = "./data/drawing.json";
 let config;
 
 try {
@@ -49,6 +50,12 @@ let random_words = fs.readFileSync('./data/random_words.txt').toString().split('
 
 // --------------------------- STARTUP ----------------------------- //
 
+plotter.unlock();
+plotter.send('M5');
+plotter.home();
+plotter.send('G90');
+plotter.send('G0 X0 Y0');
+
 try {
    let game = fs.readFileSync(game_file, 'utf8');
    crossword.load(game, true);
@@ -74,6 +81,17 @@ try {
    }
 }
 
+try {
+   let drawing = fs.readFileSync(drawing_file, 'utf8');
+   plotter.loadDrawing(drawing);
+} catch (err) {
+   if (err.code === 'ENOENT') {
+      console.log('no drawing file found, unable to restore prevuous drawing');
+   } else {
+      console.error(err);
+      throw err;
+   }
+}
 // -------------------- SERVER <> CLIENT COMMS --------------------- //
 
 
@@ -348,6 +366,8 @@ function updatePlotterRender() {
 
 async function drawFromBuffer() {
 
+   await plotter.endPlot(); // just in case
+
    while(plotter.draw_buffer.length > 0) {
 
       let p = plotter.draw_buffer.shift();
@@ -364,13 +384,19 @@ async function drawFromBuffer() {
          await plotter.vertexPlot(p.x, p.y);
          updatePlotterRender();
       }
+
+      plotter.saveDrawing(drawing_file);
    }
+
+   return new Promise((resolve, reject) => {
+      resolve(true);
+   });
 }
 
 
 // ---------------------------- DRAWING ---------------------------- //
 
-function drawCrossword() {
+async function drawCrossword() {
    let buf = plotter.draw_buffer.length;
    // debugging only
    /*drawGridBounds(
@@ -408,11 +434,17 @@ function drawCrossword() {
    updatePlotterRender();
    buf = plotter.draw_buffer.length - buf;
    console.log(buf, 'lines drawn to buffer');
-   if(config.drawing.autoplay) {
-      drawFromBuffer();
-   }
    console.log("saving grid...");
    crossword.saveGrid(grid_file);
+   plotter.saveDrawing(drawing_file);
+   if(config.drawing.autoplay && plotter.draw_buffer.length > 0) {
+      await drawFromBuffer();
+      standby();
+   }
+
+   return new Promise((resolve, reject) => {
+      resolve(true);
+   });
 }
 
 function drawChar(char, x, y, scale) {
@@ -608,6 +640,14 @@ function drawGridBounds(px, py, s, draw) {
    if (draw) {
       plotter.endDraw();
    }
+}
+
+// move pen outside the drawing somehwere
+async function standby() {
+   await plotter.endPlot(); // just in case
+   let x = config.drawing.x - 20;
+   let y = config.drawing.y + Math.random() * crossword.height * config.drawing.square_size;
+   await plotter.vertexPlot(x,y);
 }
 
 /*

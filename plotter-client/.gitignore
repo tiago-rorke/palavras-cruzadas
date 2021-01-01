@@ -3,6 +3,7 @@
 data/config.json
 data/game.json
 data/game_grid.json
+data/drawing.json
 
 # Logs
 logs

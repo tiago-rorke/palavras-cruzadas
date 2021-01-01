@@ -1,15 +1,8 @@
 "use strict";
 
+const fs = require("fs");
 const SerialPort = require('serialport')
 const { GrblStream } = require('grbl-stream')
-
-// default parameters
-// const default_travel_speed = 8000;
-// const default_draw_speed = 4000;
-// const default_up_delay = 300;
-// const default_down_delay = 300;
-// const default_up_pos = 200;
-// const default_down_pos = 700;
 
 /*
 console.log('help', await grbl.help())
@@ -128,13 +121,51 @@ internal.Plotter = class {
    }
 
    async vertexPlot(x, y) {
+      await this.send("G90"); // always make sure we are in absolute coords
       if (this.plotting) {
-         await this.send("G90"); // always make sure we are in absolute coords
          await this.send("G1 X" + x + " Y" + y + " F" + this.draw_speed);
          //await this.send("G1 F" + this.draw_speed);
          //await this.grbl.position({ x: x, y: y })
       } else {
          await this.send("G1 X" + x + " Y" + y + " F" + this.travel_speed);
+      }
+   }
+
+   saveDrawing(file) {
+      fs.writeFile(
+         file,
+         JSON.stringify(
+            {
+               draw_buffer: this.draw_buffer,
+               draw_log: this.draw_log
+            },
+            null,
+            1
+         ),
+         function (err) {
+            if (err) return console.log(err);
+         }
+      );
+      return true;
+   }
+
+   loadDrawing(file) {
+      let data;
+      try {
+         data = JSON.parse(file);
+      } catch (err) {
+         return console.log(err);
+      }
+
+      this.draw_buffer = [];
+      this.draw_log = [];
+
+      for(let i=0; i<data.draw_buffer.length; i++) {
+         this.draw_buffer.push(data.draw_buffer[i]);
+      }
+
+      for(let i=0; i<data.draw_log.length; i++) {
+         this.draw_log.push(data.draw_log[i]);
       }
    }
 }
