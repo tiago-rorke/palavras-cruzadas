@@ -288,6 +288,68 @@ internal.Crossword = class {
       }
    }
 
+   saveGrid(file) {
+      fs.writeFile(
+         file,
+         JSON.stringify(
+            {
+               width: this.width,
+               height: this.height,
+               grid: this.grid,
+               gridlines_v: this.gridlines_v,
+               gridlines_h: this.gridlines_h
+            },
+            null,
+            1
+         ),
+         function (err) {
+            if (err) return console.log(err);
+         }
+      );
+      return true;
+   }
+
+   loadGrid(file) {
+      let data;
+      try {
+         data = JSON.parse(file);
+      } catch (err) {
+         return console.log(err);
+      }
+
+      if(this.width != data.width || this.height != data.height) {
+         console.log("game file and grid file have different grid sizes!");
+      } else {
+
+         // load grid
+         for (let x=0; x<this.width; x++) {
+            for (let y=0; y<this.height; y++) {
+               this.grid[x][y] = new Square();
+               this.grid[x][y].letter = data.grid[x][y].letter;
+               this.grid[x][y].label = data.grid[x][y].label;
+               this.grid[x][y].solved = data.grid[x][y].solved;
+               this.grid[x][y].id1 = data.grid[x][y].id1;
+               this.grid[x][y].id2 = data.grid[x][y].id2;
+               this.grid[x][y].testfit = data.grid[x][y].testfit;
+               this.grid[x][y].label_drawing = data.grid[x][y].label_drawing;
+               this.grid[x][y].letter_drawing = data.grid[x][y].letter_drawing;
+            }
+         }
+
+         // load gridlines
+         for (let x=0; x<this.width; x++) {
+            for (let y=0; y<this.height+1; y++) {
+               this.gridlines_h[x][y] = data.gridlines_h[x][y];
+            }
+         }
+         for (let x=0; x<this.width+1; x++) {
+            for (let y=0; y<this.height; y++) {
+               this.gridlines_v[x][y] = data.gridlines_v[x][y];
+            }
+         }
+      }
+   }
+
    // ---------------------- word functiosn ------------------------- //
 
    /*

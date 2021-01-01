@@ -17,6 +17,7 @@ app.get('/', function (req, res){
 // data files
 const config_file = "./data/config.json"
 const game_file = "./data/game.json";
+const grid_file = "./data/game_grid.json";
 let config;
 
 try {
@@ -61,6 +62,17 @@ try {
    }
 }
 
+try {
+   let grid = fs.readFileSync(grid_file, 'utf8');
+   crossword.loadGrid(grid);
+} catch (err) {
+   if (err.code === 'ENOENT') {
+      console.log('no grid file found, unable to restore grid data');
+   } else {
+      console.error(err);
+      throw err;
+   }
+}
 
 // -------------------- SERVER <> CLIENT COMMS --------------------- //
 
@@ -399,6 +411,8 @@ function drawCrossword() {
    if(config.drawing.autoplay) {
       drawFromBuffer();
    }
+   console.log("saving grid...");
+   crossword.saveGrid(grid_file);
 }
 
 function drawChar(char, x, y, scale) {
