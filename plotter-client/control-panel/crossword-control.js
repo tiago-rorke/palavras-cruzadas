@@ -23,6 +23,14 @@ $(function () {
       update_crossword();
    }
 
+   let reset_server = document.getElementById('reset_server');
+   reset_server.onclick = () => {
+      if (window.confirm("Are you sure you want to start a new game on the server?  the current game will be archived.")) {
+         console.log("reset server");
+         socket.emit('reset_server');
+      }
+   }
+
    let new_game = document.getElementById('new_game');
    new_game.onclick = () => {
       if (window.confirm("Are you sure you want to delete everything and start a new game?")) {

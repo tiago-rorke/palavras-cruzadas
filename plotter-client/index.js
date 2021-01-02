@@ -28,6 +28,7 @@ try {
 }
 
 // websockets connection to server (heroku app)
+console.log("connecting to server at", config.server_url);
 const server_socket = socketIO_client.connect(config.server_url);
 
 // websockets connection to control panel
@@ -63,6 +64,8 @@ plotter.send('G0 X0 Y0');
 try {
    let game = fs.readFileSync(game_file, 'utf8');
    crossword.load(game, true);
+   crossword.update();
+   crossword.saveGrid(grid_file);
 } catch (err) {
    if (err.code === 'ENOENT') {
       console.log('no game file found, starting a new game');
@@ -100,9 +103,10 @@ try {
 
 
 server_socket.on('connect', () => {
-   console.log('connected to server');
+   console.log('connected to server at', config.server_url);
 
    server_socket.on("fileChanged", async () => {
+      console.log("updating from server...");
       await fetch(config.server_url + "/game.json")
       .then((res) => res.json())
       .then((out) => {
@@ -111,7 +115,32 @@ server_socket.on('connect', () => {
       .then(() => {
          let game = fs.readFileSync(game_file, 'utf8');
          crossword.load(game, false);
+         crossword.update();
+         crossword.saveGrid(grid_file);
          drawCrossword();
+         cp_socket.emit('update_crossword');
+      })
+      .catch((err) => {
+         console.log(err);
+      });
+   });
+
+   server_socket.on("newGame", async () => {
+      console.log("new game on server");
+      await fetch(config.server_url + "/game.json")
+      .then((res) => res.json())
+      .then((out) => {
+         fs.writeFileSync(game_file, JSON.stringify(out,null,1));
+      })
+      .then(() => {
+         let game = fs.readFileSync(game_file, 'utf8');
+         crossword.load(game, true);
+         crossword.save(game_file);
+         crossword.update();
+         crossword.saveGrid(grid_file);
+         clearDrawing();
+         drawCrossword();
+         cp_socket.emit('update_crossword');
       })
       .catch((err) => {
          console.log(err);
@@ -135,6 +164,10 @@ cp_socket.on('connection', (socket) => {
 
    socket.on('new_game', (w, h) => {
       newGame(w,h);
+   });
+
+   socket.on('reset_server', () => {
+      server_socket.emit('reset');
    });
 
    socket.on('add_word', (word, clue) => {
@@ -293,10 +326,9 @@ cp_socket.on('connection', (socket) => {
 
    socket.on('clear', () => {
       console.log("clear buffer");
-      plotter.draw_buffer = [];
-      plotter.draw_log = [];
-      updatePlotterRender();
+      clearDrawing();
    });
+
    socket.on('update_drawing', () => {
       updatePlotterRender();
    });
@@ -357,7 +389,9 @@ function newGame(w, h) {
    crossword = new Crossword(w,h);
    crossword.save(game_file);
    crossword.update();
+   crossword.saveGrid(grid_file);
    cp_socket.emit('update_crossword');
+   clearDrawing();
 }
 
 
@@ -375,10 +409,11 @@ async function drawFromBuffer() {
       console.log("drawing from buffer");
       await plotter.endPlot(); // just in case
       let i = 0;
+      let n = plotter.draw_buffer.length;
 
       while(plotter.draw_buffer.length > 0) {
 
-         console.log("drawing line", i, "of", plotter.draw_buffer.length);
+         console.log("drawing line", i, "of", n);
          let p = plotter.draw_buffer.shift();
          plotter.draw_log.push(p);
 
@@ -398,6 +433,7 @@ async function drawFromBuffer() {
          plotter.saveDrawing(drawing_file);
       }
       drawing_from_buffer = false;
+      standby();
 
    } else {
       "already drawing from buffer...";
@@ -410,6 +446,14 @@ async function drawFromBuffer() {
 
 
 // ---------------------------- DRAWING ---------------------------- //
+
+function clearDrawing() {
+   console.log("clearing drawing");
+   plotter.draw_buffer = [];
+   plotter.draw_log = [];
+   updatePlotterRender();
+   plotter.saveDrawing(drawing_file);
+}
 
 async function drawCrossword() {
    let buf = plotter.draw_buffer.length;
@@ -454,7 +498,6 @@ async function drawCrossword() {
    plotter.saveDrawing(drawing_file);
    if(config.drawing.autoplay && plotter.draw_buffer.length > 0) {
       await drawFromBuffer();
-      standby();
    }
 
    return new Promise((resolve, reject) => {
@@ -659,6 +702,7 @@ function drawGridBounds(px, py, s, draw) {
 
 // move pen outside the drawing somehwere
 async function standby() {
+   console.log("moving to standby.");
    await plotter.endPlot(); // just in case
    let x = config.drawing.x - 20;
    let y = config.drawing.y + Math.random() * crossword.height * config.drawing.square_size;
