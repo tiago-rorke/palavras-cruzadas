@@ -48,6 +48,10 @@ loadConfig();
 let random_words = fs.readFileSync('./data/random_words.txt').toString().split('\n');
 
 
+// debugging hack
+let drawing_from_buffer = false;
+
+
 // --------------------------- STARTUP ----------------------------- //
 
 plotter.unlock();
@@ -366,26 +370,37 @@ function updatePlotterRender() {
 
 async function drawFromBuffer() {
 
-   await plotter.endPlot(); // just in case
+   if(!drawing_from_buffer) {
+      drawing_from_buffer = true;
+      console.log("drawing from buffer");
+      await plotter.endPlot(); // just in case
+      let i = 0;
 
-   while(plotter.draw_buffer.length > 0) {
+      while(plotter.draw_buffer.length > 0) {
 
-      let p = plotter.draw_buffer.shift();
-      plotter.draw_log.push(p);
+         console.log("drawing line", i, "of", plotter.draw_buffer.length);
+         let p = plotter.draw_buffer.shift();
+         plotter.draw_log.push(p);
 
-      if(p.drawing && !plotter.plotting) {
-         await plotter.beginPlot(p.x, p.y);
-         updatePlotterRender();
-      } else if(!p.drawing && plotter.plotting) {
-         await plotter.vertexPlot(p.x, p.y);
-         updatePlotterRender();
-         await plotter.endPlot();
-      } else {
-         await plotter.vertexPlot(p.x, p.y);
-         updatePlotterRender();
+         if(p.drawing && !plotter.plotting) {
+            await plotter.beginPlot(p.x, p.y);
+            updatePlotterRender();
+         } else if(!p.drawing && plotter.plotting) {
+            await plotter.vertexPlot(p.x, p.y);
+            updatePlotterRender();
+            await plotter.endPlot();
+         } else {
+            await plotter.vertexPlot(p.x, p.y);
+            updatePlotterRender();
+         }
+
+         i++;
+         plotter.saveDrawing(drawing_file);
       }
+      drawing_from_buffer = false;
 
-      plotter.saveDrawing(drawing_file);
+   } else {
+      "already drawing from buffer...";
    }
 
    return new Promise((resolve, reject) => {

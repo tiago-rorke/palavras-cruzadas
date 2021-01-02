@@ -417,8 +417,8 @@ internal.Crossword = class {
             this.label_index++;
             return this.addWord(
                word_string,
-               Math.round(Math.random() * this.width-l),
-               Math.round(Math.random() * this.height-l),
+               Math.round(Math.random() * (this.width-l)),
+               Math.round(Math.random() * (this.height-l)),
                dir,
                this.label_index,
                clue_string,
