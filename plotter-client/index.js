@@ -55,11 +55,7 @@ let drawing_from_buffer = false;
 
 // --------------------------- STARTUP ----------------------------- //
 
-plotter.unlock();
-plotter.send('M5');
-plotter.home();
-plotter.send('G90');
-plotter.send('G0 X0 Y0');
+plotter.init();
 
 try {
    let game = fs.readFileSync(game_file, 'utf8');

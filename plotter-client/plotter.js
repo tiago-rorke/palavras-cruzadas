@@ -80,9 +80,14 @@ internal.Plotter = class {
    }
 
    async init() {
+      await this.unlock();
+      //await this.send("M3 S" + this.up_pos);
       await this.grbl.metricCoordinates();
       await this.grbl.absolutePositioning();
-      await this.send("M3 S" + this.up_pos);
+      await this.send('M5');
+      await this.home();
+      await this.send('G90');
+      await this.send('G0 X0 Y0');
    }
 
    // beginDraw, endDraw, vertex; loads drawing into draw_buffer
