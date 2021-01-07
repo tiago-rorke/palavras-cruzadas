@@ -388,6 +388,7 @@ function newGame(w, h) {
    crossword.saveGrid(grid_file);
    cp_socket.emit('update_crossword');
    clearDrawing();
+   annotateCrosswordBounds();
 }
 
 
@@ -395,7 +396,13 @@ function newGame(w, h) {
 
 
 function updatePlotterRender() {
-   cp_socket.emit('update_drawing', plotter.draw_buffer, plotter.draw_log);
+   clearAnnotations();
+   annotateCrosswordBounds();
+   cp_socket.emit('update_drawing', 
+      plotter.draw_buffer, 
+      plotter.draw_log, 
+      plotter.draw_annotations
+      );
 }
 
 async function drawFromBuffer() {
@@ -447,20 +454,28 @@ function clearDrawing() {
    console.log("clearing drawing");
    plotter.draw_buffer = [];
    plotter.draw_log = [];
+   plotter.draw_annotations = [];
    updatePlotterRender();
    plotter.saveDrawing(drawing_file);
+}
+
+function clearAnnotations() {
+   plotter.draw_annotations = [];
+}
+
+function annotateCrosswordBounds() {
+   annotateGridBounds(
+      config.drawing.x,
+      config.drawing.y,
+      config.drawing.square_size,
+      false
+      );
 }
 
 async function drawCrossword() {
    let buf = plotter.draw_buffer.length;
    // debugging only
-   /*drawGridBounds(
-      config.drawing.x,
-      config.drawing.y,
-      config.drawing.square_size,
-      false
-      );*/
-   //crossword.undrawGridlines();
+   // crossword.undrawGridlines();
    drawGridlines(
       config.drawing.x,
       config.drawing.y,
@@ -676,7 +691,7 @@ function drawGridlinesV(px, py, s) {
    }
 }
 
-function drawGridBounds(px, py, s, draw) {
+function annotateGridBounds(px, py, s, draw) {
 
    let x1 = px;
    let y1 = py;
@@ -684,15 +699,15 @@ function drawGridBounds(px, py, s, draw) {
    let y2 = py + crossword.height * s;
 
    if (draw) {
-      plotter.beginDraw();
+      plotter.beginAnnotate();
    }
-   plotter.vertex(x1,y1);
-   plotter.vertex(x2,y1);
-   plotter.vertex(x2,y2);
-   plotter.vertex(x1,y2);
-   plotter.vertex(x1,y1);
+   plotter.vertexAnnotate(x1,y1);
+   plotter.vertexAnnotate(x2,y1);
+   plotter.vertexAnnotate(x2,y2);
+   plotter.vertexAnnotate(x1,y2);
+   plotter.vertexAnnotate(x1,y1);
    if (draw) {
-      plotter.endDraw();
+      plotter.endAnnotate();
    }
 }
 

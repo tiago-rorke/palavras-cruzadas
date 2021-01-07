@@ -28,10 +28,12 @@ internal.Plotter = class {
       this.up_pos;
       this.down_pos;
 
-      this.draw_buffer = [];
-      this.draw_log = [];
-      this.drawing = false; // draw state when adding vertices to draw_buffer
-      this.plotting = false; // draw state when sending commands to plotter
+      this.draw_buffer = [];      // lines to draw
+      this.draw_log = [];         // lines already drawn
+      this.draw_annotations = []; // lines to render in preview but never draw
+      this.drawing = false;       // draw state when adding vertices to draw_buffer
+      this.plotting = false;      // draw state when sending commands to plotter
+      this.annotating = false;    // draw state when adding vertices to draw_annotations
       //this.init();
 
 		this.grbl.pipe(this.port).pipe(this.grbl)
@@ -81,13 +83,18 @@ internal.Plotter = class {
 
    async init() {
       await this.unlock();
-      //await this.send("M3 S" + this.up_pos);
       await this.grbl.metricCoordinates();
       await this.grbl.absolutePositioning();
-      await this.send('M5');
-      await this.home();
-      await this.send('G90');
-      await this.send('G0 X0 Y0');
+
+      // not sure which of these is better, but M5 seems to not work sometimes
+      //await this.send('M5');
+      //await this.send("M3 S" + this.up_pos);
+      this.send("M3 S0");
+      this.send("G4 P2"); // 2s too much?
+
+      this.home();
+      this.send('G90');
+      this.send('G0 X0 Y0');
    }
 
    // beginDraw, endDraw, vertex; loads drawing into draw_buffer
@@ -106,6 +113,25 @@ internal.Plotter = class {
          x: x,
          y: y,
          drawing: this.drawing
+      });
+   }
+
+   // beginAnnotate, endAnnotate, vertexAnnotate; loads drawing into draw_annotations
+
+   beginAnnotate() {
+      this.annotating = true;
+   }
+
+   endAnnotate() {
+      this.draw_annotations[this.draw_annotations.length - 1].drawing = false;
+      this.annotating = false;
+   }
+
+   vertexAnnotate(x, y) {
+      this.draw_annotations.push({
+         x: x,
+         y: y,
+         drawing: this.annotating
       });
    }
 

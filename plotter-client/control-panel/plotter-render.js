@@ -23,7 +23,7 @@ const plotter_p5 = (s) => {
       s.background(255);
    }
 
-   s.update = (draw_buffer, draw_log) => {
+   s.update = (draw_buffer, draw_log, draw_annotations) => {
       s.background(255);
 
       // drawn lines
@@ -50,6 +50,19 @@ const plotter_p5 = (s) => {
          let w = draw_buffer[i].drawing ? 2 : 1;
          s.strokeWeight(w);
          s.stroke(255,0,255, c);
+         s.line(x1, s.height - y1, x2, s.height - y2);
+      }
+
+      // annotations that won't be drawn
+      for(let i=0; i<draw_annotations.length-1; i++) {
+         let x1 = scale * draw_annotations[i].x;
+         let x2 = scale * draw_annotations[i+1].x;
+         let y1 = scale * draw_annotations[i].y;
+         let y2 = scale * draw_annotations[i+1].y;
+         let c = draw_annotations[i].drawing ? 255 : 30;
+         let w = draw_annotations[i].drawing ? 2 : 1;
+         s.strokeWeight(w);
+         s.stroke(255,255,0, c);
          s.line(x1, s.height - y1, x2, s.height - y2);
       }
    }
