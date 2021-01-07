@@ -25,9 +25,11 @@ $(function () {
 
    let reset_server = document.getElementById('reset_server');
    reset_server.onclick = () => {
-      if (window.confirm("Are you sure you want to start a new game on the server?  the current game will be archived.")) {
-         console.log("reset server");
-         socket.emit('reset_server');
+      let w = Number(document.getElementById('width').value);
+      let h = Number(document.getElementById('height').value);
+      if (window.confirm("Are you sure you want to start a new game of " + w + " by " + h + " on the server?  the current game will be archived.")) {
+         console.log("reset server: " + w + ', ' + h);
+         socket.emit('reset_server', w, h);
       }
    }
 

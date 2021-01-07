@@ -55,6 +55,7 @@ const plotter_p5 = (s) => {
 
       // annotations that won't be drawn
       for(let i=0; i<draw_annotations.length-1; i++) {
+         console.log(i);
          let x1 = scale * draw_annotations[i].x;
          let x2 = scale * draw_annotations[i+1].x;
          let y1 = scale * draw_annotations[i].y;

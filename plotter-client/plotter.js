@@ -57,7 +57,6 @@ internal.Plotter = class {
    	return new Promise((resolve, reject) => {
          resolve(true);
       });
-      this.init();
    }
    async status() {
       let status = await this.grbl.status();
@@ -86,11 +85,13 @@ internal.Plotter = class {
       await this.grbl.metricCoordinates();
       await this.grbl.absolutePositioning();
 
+      // lift the pen before going home.
       // not sure which of these is better, but M5 seems to not work sometimes
-      //await this.send('M5');
-      //await this.send("M3 S" + this.up_pos);
+      // not sure if we should await
+      //this.send('M5');
+      //this.send("M3 S" + this.up_pos);
       this.send("M3 S0");
-      this.send("G4 P2"); // 2s too much?
+      this.send("G4 P2"); // wait 2s too much?
 
       this.home();
       this.send('G90');

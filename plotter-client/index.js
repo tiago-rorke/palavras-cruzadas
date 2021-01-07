@@ -55,7 +55,7 @@ let drawing_from_buffer = false;
 
 // --------------------------- STARTUP ----------------------------- //
 
-plotter.init();
+//plotter.init();
 
 try {
    let game = fs.readFileSync(game_file, 'utf8');
@@ -162,8 +162,8 @@ cp_socket.on('connection', (socket) => {
       newGame(w,h);
    });
 
-   socket.on('reset_server', () => {
-      server_socket.emit('reset');
+   socket.on('reset_server', (width, height) => {
+      server_socket.emit('reset', width, height);
    });
 
    socket.on('add_word', (word, clue) => {
@@ -283,6 +283,7 @@ cp_socket.on('connection', (socket) => {
    });
 
    socket.on('save_config', (cp_config) => {
+      console.log("save_config");
       config.plotter.travel_speed = cp_config.travel_speed;
       config.plotter.draw_speed   = cp_config.draw_speed;
       config.plotter.up_pos       = cp_config.up_pos;
@@ -320,7 +321,7 @@ cp_socket.on('connection', (socket) => {
 
    // ------- DRAWING ------- //
 
-   socket.on('clear', () => {
+   socket.on('clear_drawing', () => {
       console.log("clear buffer");
       clearDrawing();
    });
@@ -467,8 +468,7 @@ function annotateCrosswordBounds() {
    annotateGridBounds(
       config.drawing.x,
       config.drawing.y,
-      config.drawing.square_size,
-      false
+      config.drawing.square_size
       );
 }
 
@@ -691,24 +691,20 @@ function drawGridlinesV(px, py, s) {
    }
 }
 
-function annotateGridBounds(px, py, s, draw) {
+function annotateGridBounds(px, py, s) {
 
    let x1 = px;
    let y1 = py;
    let x2 = px + crossword.width * s;
    let y2 = py + crossword.height * s;
 
-   if (draw) {
-      plotter.beginAnnotate();
-   }
+   plotter.beginAnnotate();
    plotter.vertexAnnotate(x1,y1);
    plotter.vertexAnnotate(x2,y1);
    plotter.vertexAnnotate(x2,y2);
    plotter.vertexAnnotate(x1,y2);
    plotter.vertexAnnotate(x1,y1);
-   if (draw) {
-      plotter.endAnnotate();
-   }
+   plotter.endAnnotate();
 }
 
 // move pen outside the drawing somehwere

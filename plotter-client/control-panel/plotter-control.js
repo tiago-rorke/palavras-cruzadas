@@ -230,18 +230,18 @@ $(function () {
       });
    }
 
-   socket.on('update_drawing', (draw_buffer, draw_log) => {
+   socket.on('update_drawing', (draw_buffer, draw_log, draw_annotations) => {
       console.log('update drawing');
-      plotter_render.update(draw_buffer, draw_log);
+      plotter_render.update(draw_buffer, draw_log, draw_annotations);
    });
 
    // --------------- DRAWING ----------------- //
 
 
-   let clear = document.getElementById('clear');
-   clear.onclick = () => {
-      console.log('clear drawing');
-      socket.emit('clear');
+   let clear_drawing = document.getElementById('clear_drawing');
+   clear_drawing.onclick = () => {
+      console.log('clear_drawing');
+      socket.emit('clear_drawing');
    }
    let draw_text = document.getElementById('draw_text');
    draw_text.onclick = () => {
@@ -253,9 +253,15 @@ $(function () {
       console.log('draw crossword');
       socket.emit('draw_crossword');
    }
+   let undraw_crossword = document.getElementById('undraw_crossword');
+   undraw_crossword.onclick = () => {
+      console.log('undraw crossword');
+      socket.emit('undraw_crossword');
+   }
 
-   let update_button = document.getElementById('update');
-   update_button.onclick = () => {
+
+   let update_drawing = document.getElementById('update_drawing');
+   update_drawing.onclick = () => {
       socket.emit('update_drawing');
    }
 
