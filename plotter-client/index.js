@@ -55,7 +55,7 @@ let drawing_from_buffer = false;
 
 // --------------------------- STARTUP ----------------------------- //
 
-//plotter.init();
+plotter.init();
 
 try {
    let game = fs.readFileSync(game_file, 'utf8');
@@ -347,6 +347,13 @@ cp_socket.on('connection', (socket) => {
    socket.on('draw_crossword', () => {
       drawCrossword();
    });
+
+   socket.on('undraw_crossword', () => {
+      console.log("undrawing crossword");
+      crossword.undrawGridlines();
+      crossword.undrawGrid();
+   });
+
 
 });
 
