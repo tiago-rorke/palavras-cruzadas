@@ -261,24 +261,28 @@ cp_socket.on('connection', (socket) => {
          down_pos:     plotter.down_pos,
          up_delay:     plotter.up_delay,
          down_delay:   plotter.down_delay,
-         draw_x:           config.drawing.x,
-         draw_y:           config.drawing.y,
-         square_size:      config.drawing.square_size,
-         text_height:      config.drawing.text_height,
-         text_spacing:     config.drawing.text_spacing,
-         letter_x:         config.drawing.letter_x,
-         letter_y:         config.drawing.letter_y,
-         label_height:     config.drawing.label_height,
-         label_x:          config.drawing.label_x,
-         label_y:          config.drawing.label_y,
-         label_spacing:    config.drawing.label_spacing,
-         label_horizontal: config.drawing.label_horizontal,
-         horizontal_first: config.drawing.horizontal_first,
-         draw_unsolved:    config.drawing.draw_unsolved,
-         autoplay:         config.drawing.autoplay,
-         page_width:       config.page.width,
-         page_height:      config.page.height,
-         page_scale:       config.page.scale
+         draw_x:             config.drawing.x,
+         draw_y:             config.drawing.y,
+         square_size:        config.drawing.square_size,
+         text_height:        config.drawing.text_height,
+         letter_x:           config.drawing.letter_x,
+         letter_y:           config.drawing.letter_y,
+         label_height:       config.drawing.label_height,
+         label_x:            config.drawing.label_x,
+         label_y:            config.drawing.label_y,
+         label_spacing:      config.drawing.label_spacing,
+         label_horizontal:   config.drawing.label_horizontal,
+         footer_x:           config.drawing.footer_x,
+         footer_y:           config.drawing.footer_y,
+         footer_text_height: config.drawing.footer_text_height,
+         text_line_spacing:  config.drawing.text_line_spacing,
+         horizontal_first:   config.drawing.horizontal_first,
+         text_spacing:       config.drawing.text_spacing,
+         draw_unsolved:      config.drawing.draw_unsolved,
+         autoplay:           config.drawing.autoplay,
+         page_width:         config.page.width,
+         page_height:        config.page.height,
+         page_scale:         config.page.scale
       });
    });
 
@@ -290,21 +294,25 @@ cp_socket.on('connection', (socket) => {
       config.plotter.down_pos     = cp_config.down_pos;
       config.plotter.up_delay     = cp_config.up_delay;
       config.plotter.down_delay   = cp_config.down_delay;
-      config.drawing.x                = cp_config.draw_x;
-      config.drawing.y                = cp_config.draw_y;
-      config.drawing.square_size      = cp_config.square_size;
-      config.drawing.text_height      = cp_config.text_height;
-      config.drawing.text_spacing     = cp_config.text_spacing;
-      config.drawing.letter_x         = cp_config.letter_x;
-      config.drawing.letter_y         = cp_config.letter_y;
-      config.drawing.label_height     = cp_config.label_height;
-      config.drawing.label_x          = cp_config.label_x;
-      config.drawing.label_y          = cp_config.label_y;
-      config.drawing.label_spacing    = cp_config.label_spacing;
-      config.drawing.label_horizontal = cp_config.label_horizontal;
-      config.drawing.horizontal_first = cp_config.horizontal_first;
-      config.drawing.draw_unsolved    = cp_config.draw_unsolved;
-      config.drawing.autoplay         = cp_config.autoplay;
+      config.drawing.x                  = cp_config.draw_x;
+      config.drawing.y                  = cp_config.draw_y;
+      config.drawing.square_size        = cp_config.square_size;
+      config.drawing.text_height        = cp_config.text_height;
+      config.drawing.letter_x           = cp_config.letter_x;
+      config.drawing.letter_y           = cp_config.letter_y;
+      config.drawing.label_height       = cp_config.label_height;
+      config.drawing.label_x            = cp_config.label_x;
+      config.drawing.label_y            = cp_config.label_y;
+      config.drawing.label_spacing      = cp_config.label_spacing;
+      config.drawing.label_horizontal   = cp_config.label_horizontal;
+      config.drawing.horizontal_first   = cp_config.horizontal_first;
+      config.drawing.footer_x           = cp_config.footer_x;
+      config.drawing.footer_y           = cp_config.footer_y;
+      config.drawing.footer_text_height = cp_config.footer_text_height;
+      config.drawing.text_line_spacing  = cp_config.text_line_spacing;
+      config.drawing.text_spacing       = cp_config.text_spacing;
+      config.drawing.draw_unsolved      = cp_config.draw_unsolved;
+      config.drawing.autoplay           = cp_config.autoplay;
       config.page.width    = cp_config.page_width;
       config.page.height   = cp_config.page_height;
       config.page.scale    = cp_config.page_scale;
@@ -322,8 +330,13 @@ cp_socket.on('connection', (socket) => {
    // ------- DRAWING ------- //
 
    socket.on('clear_drawing', () => {
-      console.log("clear buffer");
       clearDrawing();
+   });
+   socket.on('clear_draw_buffer', () => {
+      clearDrawBuffer();
+   });
+   socket.on('clear_draw_log', () => {
+      clearDrawLog();
    });
 
    socket.on('update_drawing', () => {
@@ -397,7 +410,8 @@ function newGame(w, h) {
    // crossword.saveGrid(grid_file);
    cp_socket.emit('update_crossword');
    clearDrawing();
-   annotateCrosswordBounds();
+   annotateGridBounds();
+   annotateFooterBounds();
 }
 
 
@@ -406,7 +420,8 @@ function newGame(w, h) {
 
 function updatePlotterRender() {
    clearAnnotations();
-   annotateCrosswordBounds();
+   annotateGridBounds();
+   annotateFooterBounds();
    cp_socket.emit('update_drawing', 
       plotter.draw_buffer, 
       plotter.draw_log, 
@@ -468,20 +483,27 @@ function clearDrawing() {
    plotter.saveDrawing(drawing_file);
 }
 
+function clearDrawBuffer() {
+   console.log("clearing draw buffer");
+   plotter.draw_buffer = [];
+   updatePlotterRender();
+   plotter.saveDrawing(drawing_file);
+}
+
+function clearDrawLog() {
+   console.log("clearing draw buffer");
+   plotter.draw_log = [];
+   updatePlotterRender();
+   plotter.saveDrawing(drawing_file);
+}
+
 function clearAnnotations() {
    plotter.draw_annotations = [];
 }
 
-function annotateCrosswordBounds() {
-   annotateGridBounds(
-      config.drawing.x,
-      config.drawing.y,
-      config.drawing.square_size
-      );
-}
-
 async function drawCrossword() {
    let buf = plotter.draw_buffer.length;
+   drawFooterLabels();
    // debugging only
    // crossword.undrawGridlines();
    drawGridlines(
@@ -527,6 +549,52 @@ async function drawCrossword() {
    });
 }
 
+
+async function drawFooterLabels() {
+
+   let x = config.drawing.x + config.drawing.footer_x;
+   let y = config.drawing.y + config.drawing.footer_y;
+   let l = config.drawing.text_line_spacing + config.drawing.footer_text_height;
+   y -= config.drawing.footer_text_height;
+   drawText(config.drawing.footer_label_start, x, y, config.drawing.footer_text_height, config.drawing.text_spacing);
+   y -= l;
+   drawText(config.drawing.footer_label_end, x, y, config.drawing.footer_text_height, config.drawing.text_spacing);
+   y -= l;
+   drawText(config.drawing.footer_label_player_count, x, y, config.drawing.footer_text_height, config.drawing.text_spacing);
+}
+
+function annotateFooterBounds() {
+
+   let x1 = config.drawing.x + config.drawing.footer_x;
+   let y1 = config.drawing.y + config.drawing.footer_y;
+   let y2 = y1 - (2 * config.drawing.text_line_spacing) - (3 * config.drawing.footer_text_height);
+   let x2 = x1 + config.drawing.footer_label_start.length * charWidth();
+
+   plotter.beginAnnotate();
+   plotter.vertexAnnotate(x1,y1);
+   plotter.vertexAnnotate(x2,y1);
+   plotter.vertexAnnotate(x2,y2);
+   plotter.vertexAnnotate(x1,y2);
+   plotter.vertexAnnotate(x1,y1);
+   plotter.endAnnotate();
+}
+
+
+async function drawStartTime() {
+
+
+}
+
+async function drawEndTime() {
+
+
+}
+
+async function drawPlayerCount() {
+
+
+}
+
 function drawChar(char, x, y, scale) {
 
    let index = char.charCodeAt(0) - 32;
@@ -557,10 +625,14 @@ function drawChar(char, x, y, scale) {
    }
 }
 
+function charWidth() {
+   return (config.drawing.text_height/2)*(1 + config.drawing.text_spacing);
+}
+
 function drawText(text, x, y, text_height, spacing) {
    for(let i=0; i<text.length; i++) {
       drawChar(text.charAt(i), x, y, text_height/4);
-      x += (text_height/2)*(1 + spacing);
+      x += charWidth();
    }
 }
 
@@ -704,10 +776,10 @@ function drawGridlinesV(px, py, s) {
 
 function annotateGridBounds(px, py, s) {
 
-   let x1 = px;
-   let y1 = py;
-   let x2 = px + crossword.width * s;
-   let y2 = py + crossword.height * s;
+   let x1 = config.drawing.x;
+   let y1 = config.drawing.y;
+   let x2 = x1 + crossword.width * config.drawing.square_size;
+   let y2 = y1 + crossword.height * config.drawing.square_size;
 
    plotter.beginAnnotate();
    plotter.vertexAnnotate(x1,y1);
@@ -717,6 +789,7 @@ function annotateGridBounds(px, py, s) {
    plotter.vertexAnnotate(x1,y1);
    plotter.endAnnotate();
 }
+
 
 // move pen outside the drawing somehwere
 async function standby() {

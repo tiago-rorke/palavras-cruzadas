@@ -197,6 +197,9 @@ $(function () {
       document.getElementById('page_width').value         = config.page_width;
       document.getElementById('page_height').value        = config.page_height;
       document.getElementById('page_scale').value         = config.page_scale;
+      document.getElementById('footer_x').value           = config.footer_x;
+      document.getElementById('footer_y').value           = config.footer_y;
+      document.getElementById('line_spacing').value       = config.line_spacing;
    });
 
    let save_config = document.getElementById('save_config');
@@ -226,7 +229,10 @@ $(function () {
          autoplay         : document.getElementById('autoplay').checked,
          page_width       : Number(document.getElementById('page_width').value),
          page_height      : Number(document.getElementById('page_height').value),
-         page_scale       : Number(document.getElementById('page_scale').value)
+         page_scale       : Number(document.getElementById('page_scale').value),
+         footer_x         : Number(document.getElementById('footer_x').value),
+         footer_y         : Number(document.getElementById('footer_y').value),
+         line_spacing     : Number(document.getElementById('line_spacing').value)
       });
    }
 
@@ -242,6 +248,16 @@ $(function () {
    clear_drawing.onclick = () => {
       console.log('clear_drawing');
       socket.emit('clear_drawing');
+   }
+   let clear_draw_buffer = document.getElementById('clear_draw_buffer');
+   clear_draw_buffer.onclick = () => {
+      console.log('clear_draw_buffer');
+      socket.emit('clear_draw_buffer');
+   }
+   let clear_draw_log = document.getElementById('clear_draw_log');
+   clear_draw_log.onclick = () => {
+      console.log('clear_draw_log');
+      socket.emit('clear_draw_log');
    }
    let draw_text = document.getElementById('draw_text');
    draw_text.onclick = () => {

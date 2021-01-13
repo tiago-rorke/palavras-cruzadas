@@ -60,6 +60,8 @@
       <div id="plotter_canvas" style="margin:10px" oncontextmenu="return false;"></div>
       <button id="update_drawing" type="button">update</button>
       <button id="clear_drawing" type="button">clear</button><br />
+      <button id="clear_draw_buffer" type="button">clear buffer (pink)</button><br />
+      <button id="clear_draw_log" type="button">clear log (blue)</button><br />
       <br />
       <input style="width:100px" id="page_width" type="number" value="1000" step="10"/><span>  page width (mm)</span><br />
       <input style="width:100px" id="page_height" type="number" value="700" step="10"/><span>  page height (mm)</span><br />
@@ -91,13 +93,16 @@
       <br />
       <input style="width:100px" id="square_size" type="number" value="30" /><span>  square size</span><br />
       <input style="width:100px" id="text_height" type="number" value="15" /><span>  text height</span><br />
-      <input style="width:100px" id="text_spacing" type="number" value="0.15" step="0.01"/><span>  text spacing</span><br />
       <input style="width:100px" id="letter_x" type="number" value="0" /><span>  letter offset x</span><br />
       <input style="width:100px" id="letter_y" type="number" value="0" /><span>  letter offset y</span><br />
       <input style="width:100px" id="label_height" type="number" value="5" /><span>  number label height</span><br />
       <input style="width:100px" id="label_x" type="number" value="0" /><span>  number label margin x</span><br />
       <input style="width:100px" id="label_y" type="number" value="0" /><span>  number label margin y</span><br />
       <input style="width:100px" id="label_spacing" type="number" value="0.15" step="0.01"/><span>  number label spacing</span><br />
+      <input style="width:100px" id="footer_x" type="number" value="0" /><span>  footer x (relative to drawing x)</span><br />
+      <input style="width:100px" id="footer_y" type="number" value="-20" /><span>  footer y (relative to drawing y)</span><br />
+      <input style="width:100px" id="text_spacing" type="number" value="0.15" step="0.01"/><span>  text letter spacing</span><br />
+      <input style="width:100px" id="line_spacing" type="number" value="2" /><span>  text line spacing</span><br />
       <span>  number label orientation</span><br />
       <input style="margin-left:20px" type="radio" id="label_horizontal" name="label_orientation"><span>horizontal</span><br />
       <input style="margin-left:20px" type="radio" id="label_vertical" name="label_orientation" checked><span>vertical</span><br />
