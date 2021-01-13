@@ -164,7 +164,7 @@ internal.Plotter = class {
    }
 
    saveDrawing(file) {
-      fs.writeFile(
+      fs.writeFileSync(
          file,
          JSON.stringify(
             {

@@ -60,8 +60,6 @@ plotter.init();
 try {
    let game = fs.readFileSync(game_file, 'utf8');
    crossword.load(game, true);
-   crossword.update();
-   crossword.saveGrid(grid_file);
 } catch (err) {
    if (err.code === 'ENOENT') {
       console.log('no game file found, starting a new game');
@@ -99,7 +97,7 @@ try {
 
 
 server_socket.on('connect', () => {
-   console.log('connected to server at', config.server_url);
+   console.log('connected to server');
 
    server_socket.on("fileChanged", async () => {
       console.log("updating from server...");
@@ -111,8 +109,9 @@ server_socket.on('connect', () => {
       .then(() => {
          let game = fs.readFileSync(game_file, 'utf8');
          crossword.load(game, false);
-         crossword.update();
-         crossword.saveGrid(grid_file);
+         // not sure if these should be here
+         // crossword.update();
+         // crossword.saveGrid(grid_file);
          drawCrossword();
          cp_socket.emit('update_crossword');
       })
@@ -131,9 +130,10 @@ server_socket.on('connect', () => {
       .then(() => {
          let game = fs.readFileSync(game_file, 'utf8');
          crossword.load(game, true);
-         crossword.save(game_file);
-         crossword.update();
-         crossword.saveGrid(grid_file);
+         // not sure if these should be here
+         // crossword.save(game_file);
+         // crossword.update();
+         // crossword.saveGrid(grid_file);
          clearDrawing();
          drawCrossword();
          cp_socket.emit('update_crossword');
@@ -393,7 +393,8 @@ function newGame(w, h) {
    crossword = new Crossword(w,h);
    crossword.save(game_file);
    crossword.update();
-   crossword.saveGrid(grid_file);
+   // not sure if this should be here
+   // crossword.saveGrid(grid_file);
    cp_socket.emit('update_crossword');
    clearDrawing();
    annotateCrosswordBounds();
@@ -513,7 +514,10 @@ async function drawCrossword() {
    console.log(buf, 'lines drawn to buffer');
    console.log("saving grid...");
    crossword.saveGrid(grid_file);
+   console.log("grid saved.");
+   console.log("saving draw buffers...");
    plotter.saveDrawing(drawing_file);
+   console.log("draw buffers saved.");
    if(config.drawing.autoplay && plotter.draw_buffer.length > 0) {
       await drawFromBuffer();
    }

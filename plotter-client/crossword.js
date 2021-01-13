@@ -178,6 +178,7 @@ internal.Crossword = class {
             this.label_index = w.label;
          }
       }
+
       this.update();
 
       // not sure if should be an async function...
@@ -188,7 +189,7 @@ internal.Crossword = class {
    }
 
    save(file) {
-      fs.writeFile(
+      fs.writeFileSync(
          file,
          JSON.stringify(
             {
@@ -302,7 +303,7 @@ internal.Crossword = class {
    }
 
    saveGrid(file) {
-      fs.writeFile(
+      fs.writeFileSync(
          file,
          JSON.stringify(
             {
