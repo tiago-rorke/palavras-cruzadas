@@ -159,11 +159,13 @@ cp_socket.on('connection', (socket) => {
    });
 
    socket.on('new_game', (w, h) => {
+      console.log('new game', w, h);
       newGame(w,h);
    });
 
-   socket.on('reset_server', (width, height) => {
-      server_socket.emit('reset', width, height);
+   socket.on('reset_server', (w, h) => {
+      console.log('reset game on server', w, h);
+      server_socket.emit('reset', w, h);
    });
 
    socket.on('add_word', (word, clue) => {
