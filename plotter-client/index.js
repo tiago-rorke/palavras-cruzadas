@@ -55,7 +55,7 @@ let drawing_from_buffer = false;
 
 // --------------------------- STARTUP ----------------------------- //
 
-plotter.init();
+//plotter.init();
 
 try {
    let game = fs.readFileSync(game_file, 'utf8');
@@ -63,7 +63,7 @@ try {
 } catch (err) {
    if (err.code === 'ENOENT') {
       console.log('no game file found, starting a new game');
-      newGame(30,20);
+      newGame(30, 20, true);
    } else {
       console.error(err);
       throw err;
@@ -127,16 +127,11 @@ server_socket.on('connect', () => {
       .then((out) => {
          fs.writeFileSync(game_file, JSON.stringify(out,null,1));
       })
-      .then(() => {
+      .then( async () => {
          let game = fs.readFileSync(game_file, 'utf8');
-         crossword.load(game, true);
-         // not sure if these should be here
-         // crossword.save(game_file);
-         // crossword.update();
-         // crossword.saveGrid(grid_file);
-         clearDrawing();
-         drawCrossword();
-         cp_socket.emit('update_crossword');
+         await crossword.load(game, true)
+         console.log(crossword.game_file)
+         newGame(0,0,false);
       })
       .catch((err) => {
          console.log(err);
@@ -160,10 +155,6 @@ server_socket.on('connect', () => {
       });
    });
 
-
-
-
-
 });
 
 
@@ -181,8 +172,7 @@ cp_socket.on('connection', (socket) => {
    });
 
    socket.on('new_game', (w, h) => {
-      console.log('new game', w, h);
-      newGame(w,h);
+      newGame(w, h, true);
    });
 
    socket.on('end_game', (w, h) => {
@@ -202,6 +192,7 @@ cp_socket.on('connection', (socket) => {
          console.log(w);
          crossword.save(game_file);
          crossword.update();
+         drawCrossword();
          cp_socket.emit('update_crossword');
       } else {
          console.log('failed to add new word');
@@ -229,6 +220,7 @@ cp_socket.on('connection', (socket) => {
       console.log('successfully added ' + c + ' of ' + n + ' words');
       crossword.save(game_file);
       crossword.update();
+      drawCrossword();
       cp_socket.emit('update_crossword');
    });
 
@@ -447,19 +439,22 @@ function loadConfig() {
 
 // --------------------------- CROSSWORD --------------------------- //
 
-function newGame(w, h) {
-   console.log('new game', w, h);
-   crossword = new Crossword(w,h);
-   crossword.save(game_file);
-   crossword.update();
+function newGame(w, h, local_reset) {
+   console.log('new game');
+   if(local_reset) {
+      console.log('local reset, grid size:' +  w + ' x ' + h);
+      crossword = new Crossword(w,h);
+      crossword.save(game_file);
+   }
    // not sure if this should be here
+   // crossword.update();
    // crossword.saveGrid(grid_file);
-   cp_socket.emit('update_crossword');
    clearDrawing();
    annotateGridBounds();
    annotateFooterBounds();
    drawFooterLabels();
    drawStartTime();
+   cp_socket.emit('update_crossword');
 }
 
 function endGame() {
@@ -615,8 +610,10 @@ async function drawFooterLabels() {
    drawText(config.drawing.footer_label_start, x, y, config.drawing.footer_text_height, config.drawing.text_spacing);
    y -= l;
    drawText(config.drawing.footer_label_end, x, y, config.drawing.footer_text_height, config.drawing.text_spacing);
-   y -= l;
-   drawText(config.drawing.footer_label_player_count, x, y, config.drawing.footer_text_height, config.drawing.text_spacing);
+
+   // upcoming feature! draw player count
+   // y -= l;
+   //drawText(config.drawing.footer_label_player_count, x, y, config.drawing.footer_text_height, config.drawing.text_spacing);
 }
 
 function annotateFooterBounds() {
