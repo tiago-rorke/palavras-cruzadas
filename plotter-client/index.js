@@ -142,6 +142,28 @@ server_socket.on('connect', () => {
          console.log(err);
       });
    });
+
+   server_socket.on("endGame", async () => {
+      console.log("server says game is over");
+      await fetch(config.server_url + "/game.json")
+      .then((res) => res.json())
+      .then((out) => {
+         fs.writeFileSync(game_file, JSON.stringify(out,null,1));
+      })
+      .then(() => {
+         let game = fs.readFileSync(game_file, 'utf8');
+         crossword.load(game, false);
+         endGame();
+      })
+      .catch((err) => {
+         console.log(err);
+      });
+   });
+
+
+
+
+
 });
 
 
@@ -165,8 +187,7 @@ cp_socket.on('connection', (socket) => {
 
    socket.on('end_game', (w, h) => {
       console.log('end game');
-      endGame();
-      server_socket.emit('end_game');
+      server_socket.emit('endGame');
    });
 
    socket.on('reset_server', (w, h) => {
@@ -443,6 +464,7 @@ function newGame(w, h) {
 
 function endGame() {
    drawEndTime();
+   updatePlotterRender();
 }
 
 
@@ -629,7 +651,7 @@ async function drawStartTime() {
 
 async function drawEndTime() {
 
-   let timestamp = crossword.start_time.substring(0, 16);
+   let timestamp = crossword.end_time.substring(0, 16);
    drawText(
       timestamp,
       config.drawing.x + config.drawing.footer_x + footerWidth(),
