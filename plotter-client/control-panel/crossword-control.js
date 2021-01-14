@@ -23,6 +23,14 @@ $(function () {
       update_crossword();
    }
 
+   let end_game = document.getElementById('end_game');
+   end_game.onclick = () => {
+      if (window.confirm("Are you sure you want to end the current game?  Players will no longer be able to interact with it.")) {
+         console.log("end game");
+         socket.emit('end_game');
+      }
+   }
+
    let reset_server = document.getElementById('reset_server');
    reset_server.onclick = () => {
       let w = Number(document.getElementById('width').value);

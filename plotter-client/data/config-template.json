@@ -29,12 +29,12 @@
   "horizontal_first": true,
   "footer_x": 0,
   "footer_y": -10,
-  "footer_text_height": 5,
+  "footer_text_height": 3.8,
   "text_line_spacing": 5,
-  "text_spacing": 0.25,
-  "footer_label_start":        "HORA DE INICIO  =",
-  "footer_label_end":          "HORA DE TERMINO =",
-  "footer_label_player_count": "JOGADORAS       =",
+  "text_spacing": 0.1,
+  "footer_label_start":        "START   = ",
+  "footer_label_end":          "END     = ",
+  "footer_label_player_count": "PLAYERS = ",
   "draw_unsolved": false
  },
  "page": {

@@ -181,7 +181,6 @@ $(function () {
       document.getElementById('draw_y').value             = config.draw_y;
       document.getElementById('square_size').value        = config.square_size;
       document.getElementById('text_height').value        = config.text_height;
-      document.getElementById('text_spacing').value       = config.text_spacing;
       document.getElementById('letter_x').value           = config.letter_x;
       document.getElementById('letter_y').value           = config.letter_y;
       document.getElementById('label_height').value       = config.label_height;
@@ -199,40 +198,43 @@ $(function () {
       document.getElementById('page_scale').value         = config.page_scale;
       document.getElementById('footer_x').value           = config.footer_x;
       document.getElementById('footer_y').value           = config.footer_y;
-      document.getElementById('line_spacing').value       = config.line_spacing;
+      document.getElementById('footer_text_height').value = config.footer_text_height;
+      document.getElementById('text_line_spacing').value  = config.text_line_spacing;
+      document.getElementById('text_spacing').value       = config.text_spacing;
    });
 
    let save_config = document.getElementById('save_config');
    save_config.onclick = () => {
       console.log('save_config');
       socket.emit('save_config', {
-         travel_speed     : Number(document.getElementById('travel_speed').value),
-         draw_speed       : Number(document.getElementById('draw_speed').value),
-         up_pos           : Number(document.getElementById('up_pos').value),
-         down_pos         : Number(document.getElementById('down_pos').value),
-         up_delay         : Number(document.getElementById('up_delay').value),
-         down_delay       : Number(document.getElementById('down_delay').value),
-         draw_x           : Number(document.getElementById('draw_x').value),
-         draw_y           : Number(document.getElementById('draw_y').value),
-         square_size      : Number(document.getElementById('square_size').value),
-         text_height      : Number(document.getElementById('text_height').value),
-         text_spacing     : Number(document.getElementById('text_spacing').value),
-         letter_x         : Number(document.getElementById('letter_x').value),
-         letter_y         : Number(document.getElementById('letter_y').value),
-         label_height     : Number(document.getElementById('label_height').value),
-         label_x          : Number(document.getElementById('label_x').value),
-         label_y          : Number(document.getElementById('label_y').value),
-         label_spacing    : Number(document.getElementById('label_spacing').value),
-         label_horizontal : document.getElementById('label_horizontal').checked,
-         horizontal_first : document.getElementById('horizontal_first').checked,
-         draw_unsolved    : document.getElementById('draw_unsolved').checked,
-         autoplay         : document.getElementById('autoplay').checked,
-         page_width       : Number(document.getElementById('page_width').value),
-         page_height      : Number(document.getElementById('page_height').value),
-         page_scale       : Number(document.getElementById('page_scale').value),
-         footer_x         : Number(document.getElementById('footer_x').value),
-         footer_y         : Number(document.getElementById('footer_y').value),
-         line_spacing     : Number(document.getElementById('line_spacing').value)
+         travel_speed       : Number(document.getElementById('travel_speed').value),
+         draw_speed         : Number(document.getElementById('draw_speed').value),
+         up_pos             : Number(document.getElementById('up_pos').value),
+         down_pos           : Number(document.getElementById('down_pos').value),
+         up_delay           : Number(document.getElementById('up_delay').value),
+         down_delay         : Number(document.getElementById('down_delay').value),
+         draw_x             : Number(document.getElementById('draw_x').value),
+         draw_y             : Number(document.getElementById('draw_y').value),
+         square_size        : Number(document.getElementById('square_size').value),
+         text_height        : Number(document.getElementById('text_height').value),
+         letter_x           : Number(document.getElementById('letter_x').value),
+         letter_y           : Number(document.getElementById('letter_y').value),
+         label_height       : Number(document.getElementById('label_height').value),
+         label_x            : Number(document.getElementById('label_x').value),
+         label_y            : Number(document.getElementById('label_y').value),
+         label_spacing      : Number(document.getElementById('label_spacing').value),
+         label_horizontal   : document.getElementById('label_horizontal').checked,
+         horizontal_first   : document.getElementById('horizontal_first').checked,
+         draw_unsolved      : document.getElementById('draw_unsolved').checked,
+         autoplay           : document.getElementById('autoplay').checked,
+         page_width         : Number(document.getElementById('page_width').value),
+         page_height        : Number(document.getElementById('page_height').value),
+         page_scale         : Number(document.getElementById('page_scale').value),
+         footer_x           : Number(document.getElementById('footer_x').value),
+         footer_y           : Number(document.getElementById('footer_y').value),
+         footer_text_height : Number(document.getElementById('footer_text_height').value),
+         text_line_spacing  : Number(document.getElementById('text_line_spacing').value),
+         text_spacing       : Number(document.getElementById('text_spacing').value)
       });
    }
 
@@ -274,6 +276,25 @@ $(function () {
       console.log('undraw crossword');
       socket.emit('undraw_crossword');
    }
+   let draw_footer_labels = document.getElementById('draw_footer_labels');
+   draw_footer_labels.onclick = () => {
+      console.log('draw_footer_labels');
+      socket.emit('draw_footer_labels');
+   }
+   let draw_start_time = document.getElementById('draw_start_time');
+   draw_start_time.onclick = () => {
+      console.log('draw_start_time');
+      socket.emit('draw_start_time');
+   }
+   let draw_end_time = document.getElementById('draw_end_time');
+   draw_end_time.onclick = () => {
+      console.log('draw_end_time');
+      socket.emit('draw_end_time');
+   }
+
+
+
+
 
 
    let update_drawing = document.getElementById('update_drawing');

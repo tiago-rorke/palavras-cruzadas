@@ -163,6 +163,12 @@ cp_socket.on('connection', (socket) => {
       newGame(w,h);
    });
 
+   socket.on('end_game', (w, h) => {
+      console.log('end game');
+      endGame();
+      server_socket.emit('end_game');
+   });
+
    socket.on('reset_server', (w, h) => {
       console.log('reset game on server', w, h);
       server_socket.emit('reset', w, h);
@@ -369,6 +375,22 @@ cp_socket.on('connection', (socket) => {
       crossword.undrawGrid();
    });
 
+   socket.on('draw_footer_labels', () => {
+      console.log("drawing footer labels");
+      drawFooterLabels();
+      updatePlotterRender();
+   });
+   socket.on('draw_start_time', () => {
+      console.log("drawing start time");
+      drawStartTime();
+      updatePlotterRender();
+   });
+   socket.on('draw_end_time', () => {
+      console.log("drawing end time");
+      drawEndTime();
+      updatePlotterRender();
+   });
+
 
 });
 
@@ -389,6 +411,7 @@ function loadConfig() {
 
    try {
       config = JSON.parse(fs.readFileSync(config_file, 'utf8'));
+      //console.log(config);
    } catch (err) {
       return console.log(err);
    }
@@ -414,6 +437,12 @@ function newGame(w, h) {
    clearDrawing();
    annotateGridBounds();
    annotateFooterBounds();
+   drawFooterLabels();
+   drawStartTime();
+}
+
+function endGame() {
+   drawEndTime();
 }
 
 
@@ -462,7 +491,7 @@ async function drawFromBuffer() {
          plotter.saveDrawing(drawing_file);
       }
       drawing_from_buffer = false;
-      standby();
+      //standby();
 
    } else {
       "already drawing from buffer...";
@@ -505,7 +534,6 @@ function clearAnnotations() {
 
 async function drawCrossword() {
    let buf = plotter.draw_buffer.length;
-   drawFooterLabels();
    // debugging only
    // crossword.undrawGridlines();
    drawGridlines(
@@ -551,6 +579,10 @@ async function drawCrossword() {
    });
 }
 
+function footerWidth() {
+   return config.drawing.footer_label_start.length * charWidth(config.drawing.footer_text_height);
+}
+
 
 async function drawFooterLabels() {
 
@@ -570,7 +602,7 @@ function annotateFooterBounds() {
    let x1 = config.drawing.x + config.drawing.footer_x;
    let y1 = config.drawing.y + config.drawing.footer_y;
    let y2 = y1 - (2 * config.drawing.text_line_spacing) - (3 * config.drawing.footer_text_height);
-   let x2 = x1 + config.drawing.footer_label_start.length * charWidth();
+   let x2 = x1 + footerWidth();
 
    plotter.beginAnnotate();
    plotter.vertexAnnotate(x1,y1);
@@ -584,11 +616,27 @@ function annotateFooterBounds() {
 
 async function drawStartTime() {
 
+   let timestamp = crossword.start_time.substring(0, 16);
+   drawText(
+      timestamp,
+      config.drawing.x + config.drawing.footer_x + footerWidth(),
+      config.drawing.y + config.drawing.footer_y - config.drawing.footer_text_height,
+      config.drawing.footer_text_height,
+      config.drawing.text_spacing
+      );
 
 }
 
 async function drawEndTime() {
 
+   let timestamp = crossword.start_time.substring(0, 16);
+   drawText(
+      timestamp,
+      config.drawing.x + config.drawing.footer_x + footerWidth(),
+      config.drawing.y + config.drawing.footer_y - (2*config.drawing.footer_text_height) - config.drawing.text_line_spacing,
+      config.drawing.footer_text_height,
+      config.drawing.text_spacing
+      );
 
 }
 
@@ -627,14 +675,14 @@ function drawChar(char, x, y, scale) {
    }
 }
 
-function charWidth() {
-   return (config.drawing.text_height/2)*(1 + config.drawing.text_spacing);
+function charWidth(text_height) {
+   return (text_height/2)*(1 + config.drawing.text_spacing);
 }
 
 function drawText(text, x, y, text_height, spacing) {
    for(let i=0; i<text.length; i++) {
       drawChar(text.charAt(i), x, y, text_height/4);
-      x += charWidth();
+      x += charWidth(text_height);
    }
 }
 
