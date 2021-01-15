@@ -55,7 +55,7 @@ let drawing_from_buffer = false;
 
 // --------------------------- STARTUP ----------------------------- //
 
-//plotter.init();
+plotter.init();
 
 try {
    let game = fs.readFileSync(game_file, 'utf8');
@@ -508,7 +508,7 @@ async function drawFromBuffer() {
          plotter.saveDrawing(drawing_file);
       }
       drawing_from_buffer = false;
-      //standby();
+      standby();
 
    } else {
       "already drawing from buffer...";
@@ -864,8 +864,8 @@ function annotateGridBounds(px, py, s) {
 async function standby() {
    console.log("moving to standby.");
    await plotter.endPlot(); // just in case
-   let x = config.drawing.x - 20;
-   let y = config.drawing.y + Math.random() * crossword.height * config.drawing.square_size;
+   let x = config.drawing.x; // - 20;
+   let y = config.drawing.y; // + Math.random() * crossword.height * config.drawing.square_size;
    await plotter.vertexPlot(x,y);
 }
 
