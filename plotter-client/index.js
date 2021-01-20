@@ -64,6 +64,18 @@ class Word_path {
 // whether or not we are in standby mode
 let active = false;
 
+// for diagonal bounce standby mode
+let standby_pos = {
+   x: -1,
+   y: -1,
+   x_min: -1,
+   y_min: -1,
+   x_max: -1,
+   y_max: -1,
+   dir_x: -1,
+   dir_y: -1
+};
+
 // debugging hack
 let drawing_from_buffer = false;
 
@@ -331,9 +343,9 @@ cp_socket.on('connection', (socket) => {
          text_spacing:       config.drawing.text_spacing,
          draw_unsolved:      config.drawing.draw_unsolved,
          autoplay:           config.drawing.autoplay,
-         standby_wander:     config.drawing.standby_wander,
-         standby_x:          config.drawing.standby_x,
-         standby_y:          config.drawing.standby_y,
+         standby_wander:     config.standby.wander,
+         standby_x:          config.standby.x_offset,
+         standby_y:          config.standby.y_offset,
          page_width:         config.page.width,
          page_height:        config.page.height,
          page_scale:         config.page.scale
@@ -368,9 +380,9 @@ cp_socket.on('connection', (socket) => {
       config.drawing.text_spacing       = cp_config.text_spacing;
       config.drawing.draw_unsolved      = cp_config.draw_unsolved;
       config.drawing.autoplay           = cp_config.autoplay;
-      config.drawing.standby_wander     = cp_config.standby_wander;
-      config.drawing.standby_x          = cp_config.standby_x;
-      config.drawing.standby_y          = cp_config.standby_y;
+      config.standby.wander             = cp_config.standby_wander;
+      config.standby.x_offset    = cp_config.standby_x;
+      config.standby.y_offset    = cp_config.standby_y;
       config.page.width    = cp_config.page_width;
       config.page.height   = cp_config.page_height;
       config.page.scale    = cp_config.page_scale;
@@ -929,12 +941,17 @@ function annotateGridBounds(px, py, s) {
 
 // move pen outside the drawing somehwere
 async function standby() {
-   if(config.drawing.standby_wander) {
-      console.log("starting random walk...");
-      randomWalkUpdate();
+   if(config.standby.wander) {
+      console.log("starting diagonal bounce...");
+      diagonalBounceInit();
       while(!active) {
-         await randomWalk();
+         await diagonalBounce();
       }
+      // console.log("starting random walk...");
+      // randomWalkUpdate();
+      // while(!active) {
+      //    await randomWalk();
+      // }
    } else {
       console.log("moving to static standby position...");
       await plotter.endPlot(); // just in case
@@ -984,10 +1001,10 @@ async function randomWalk() {
    let x2 = config.drawing.x + w.x2 * config.drawing.square_size;
    let y2 = config.drawing.y + (crossword.height - w.y2) * config.drawing.square_size;
 
-   x1 += config.drawing.standby_x;
-   y1 += config.drawing.standby_y;
-   x2 += config.drawing.standby_x;
-   y2 += config.drawing.standby_y;
+   x1 += config.standby.x_offset;
+   y1 += config.standby.y_offset;
+   x2 += config.standby.x_offset;
+   y2 += config.standby.y_offset;
 
    await plotter.endPlot(); // just in case
    await plotter.vertexPlot(x1,y1,true);
@@ -1053,8 +1070,8 @@ function getPosInGrid(standby_offset = false) {
 
    // subtract standby offset if in standby mode
    if(standby_offset) {
-      x -= config.drawing.standby_x;
-      y -= config.drawing.standby_y;
+      x -= config.standby.x_offset;
+      y -= config.standby.y_offset;
    }
 
    // relative to grid position
@@ -1084,6 +1101,98 @@ function dist(x1,y1,x2,y2) {
    return d;
 }
 
+
+
+async function diagonalBounceInit() {
+   let p = getPosInGrid(true);
+   standby_pos = {
+      x: p.x,
+      y: p.y,
+      x_min: -1,
+      y_min: -1,
+      x_max: -1,
+      y_max: -1,
+      dir_x: (Math.random() > 0.5 ? -1 : 1),
+      dir_y: (Math.random() > 0.5 ? -1 : 1),
+   };
+   for (let x=0; x<crossword.width; x++) {
+      for (let y=0; y<crossword.height; y++) {
+         if(crossword.grid[x][y].id1 >= 0) {
+            standby_pos.x_min = x;
+            break;
+         }
+      }
+      if(standby_pos.x_min >= 0) {
+         break;
+      }
+   }
+   for (let x=crossword.width-1; x>=0; x--) {
+      for (let y=0; y<crossword.height; y++) {
+         if(crossword.grid[x][y].id1 >= 0) {
+            standby_pos.x_max = x;
+            break;
+         }
+      }
+      if(standby_pos.x_max >= 0) {
+         break;
+      }
+   }
+   for (let y=0; y<crossword.height; y++) {
+      for (let x=0; x<crossword.width; x++) {
+         if(crossword.grid[x][y].id1 >= 0) {
+            standby_pos.y_min = y;
+            break;
+         }
+      }
+      if(standby_pos.y_min >= 0) {
+         break;
+      }
+   }
+   for (let y=crossword.height-1; y>=0; y--) {
+      for (let x=0; x<crossword.width; x++) {
+         if(crossword.grid[x][y].id1 >= 0) {
+            standby_pos.y_max = y;
+            break;
+         }
+      }
+      if(standby_pos.y_max >= 0) {
+         break;
+      }
+   }
+   console.log(standby_pos);
+   await plotter.endPlot(); // just in case
+}
+
+
+async function diagonalBounce() {
+
+   // move diagonally by v_interval distance in grid
+   standby_pos.x += config.standby.v_interval * standby_pos.dir_x;
+   standby_pos.y += config.standby.v_interval * standby_pos.dir_y;
+
+   // constrain to the min and max gird position values
+   standby_pos.dir_x = standby_pos.x < standby_pos.x_min ? 1 : standby_pos.dir_x;
+   standby_pos.dir_x = standby_pos.x > standby_pos.x_max ? -1 : standby_pos.dir_x;
+   standby_pos.dir_y = standby_pos.y < standby_pos.y_min ? 1 : standby_pos.dir_y;
+   standby_pos.dir_y = standby_pos.y > standby_pos.y_max ? -1 : standby_pos.dir_y;
+
+   // transform to mm coordinates
+   let x = config.drawing.x + standby_pos.x * config.drawing.square_size;
+   let y = config.drawing.y + (crossword.height - standby_pos.y) * config.drawing.square_size;
+
+   x += config.standby.x_offset;
+   y += config.standby.y_offset;
+
+   await plotter.vertexPlot(x,y,true);
+
+   let d = 9999;
+   while (d > config.standby.v_threshold) {
+      let p = getPosInGrid(true);
+      d = dist(p.x, p.y, standby_pos.x, standby_pos.y);
+      // wait for the ping interval
+      await new Promise(resolve => setTimeout(resolve, config.plotter.ping_interval));
+   }
+}
 
 
 /*

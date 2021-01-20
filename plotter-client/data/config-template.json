@@ -37,10 +37,14 @@
   "footer_label_start":        "START   = ",
   "footer_label_end":          "END     = ",
   "footer_label_player_count": "PLAYERS = ",
-  "draw_unsolved": false,
-  "standby_wander": false,
-  "standby_x": -20,
-  "standby_y": -30,
+  "draw_unsolved": false
+ },
+ "standby": {
+  "wander": true,
+  "x_offset": -20,
+  "y_offset": -30,
+  "v_interval": 1,
+  "v_threshold": 1
  },
  "page": {
   "width": 1000,
