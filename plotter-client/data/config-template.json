@@ -7,6 +7,7 @@
   "port": "/dev/ttyUSB0",
   "baud": 115200,
   "ping_interval": 500,
+  "standby_speed": 1000,
   "travel_speed": 9000,
   "draw_speed": 3000,
   "up_pos": 200,
@@ -37,7 +38,9 @@
   "footer_label_start":        "START   = ",
   "footer_label_end":          "END     = ",
   "footer_label_player_count": "PLAYERS = ",
-  "draw_unsolved": false
+  "draw_unsolved": false,
+  "standby_x": -20,
+  "standby_y": -30,
  },
  "page": {
   "width": 1000,

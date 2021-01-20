@@ -172,6 +172,7 @@ $(function () {
       console.log('got config');
       //console.log(config);
       document.getElementById('travel_speed').value       = config.travel_speed;
+      document.getElementById('standby_speed').value      = config.standby_speed;
       document.getElementById('draw_speed').value         = config.draw_speed;
       document.getElementById('up_pos').value             = config.up_pos;
       document.getElementById('down_pos').value           = config.down_pos;
@@ -193,6 +194,8 @@ $(function () {
       document.getElementById('vertical_first').checked   = !config.horizontal_first;
       document.getElementById('draw_unsolved').checked    = config.draw_unsolved;
       document.getElementById('autoplay').checked         = config.autoplay;
+      document.getElementById('standby_x').value          = config.standby_x;
+      document.getElementById('standby_y').value          = config.standby_y;
       document.getElementById('page_width').value         = config.page_width;
       document.getElementById('page_height').value        = config.page_height;
       document.getElementById('page_scale').value         = config.page_scale;
@@ -208,6 +211,7 @@ $(function () {
       console.log('save_config');
       socket.emit('save_config', {
          travel_speed       : Number(document.getElementById('travel_speed').value),
+         standby_speed      : Number(document.getElementById('standby_speed').value),
          draw_speed         : Number(document.getElementById('draw_speed').value),
          up_pos             : Number(document.getElementById('up_pos').value),
          down_pos           : Number(document.getElementById('down_pos').value),
@@ -227,6 +231,8 @@ $(function () {
          horizontal_first   : document.getElementById('horizontal_first').checked,
          draw_unsolved      : document.getElementById('draw_unsolved').checked,
          autoplay           : document.getElementById('autoplay').checked,
+         standby_x          : Number(document.getElementById('standby_x').value),
+         standby_y          : Number(document.getElementById('standby_y').value),
          page_width         : Number(document.getElementById('page_width').value),
          page_height        : Number(document.getElementById('page_height').value),
          page_scale         : Number(document.getElementById('page_scale').value),

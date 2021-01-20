@@ -22,6 +22,7 @@ internal.Plotter = class {
 		this.grbl = new GrblStream()
 
       this.travel_speed;
+      this.standby_speed;
       this.draw_speed;
       this.up_delay;
       this.down_delay;
@@ -156,14 +157,18 @@ internal.Plotter = class {
       this.plotting = false;
    }
 
-   async vertexPlot(x, y) {
+   async vertexPlot(x, y, standby = false) {
       await this.send("G90"); // always make sure we are in absolute coords
       if (this.plotting) {
          await this.send("G1 X" + x + " Y" + y + " F" + this.draw_speed);
          //await this.send("G1 F" + this.draw_speed);
          //await this.grbl.position({ x: x, y: y })
       } else {
-         await this.send("G1 X" + x + " Y" + y + " F" + this.travel_speed);
+         if(standby) {
+            await this.send("G1 X" + x + " Y" + y + " F" + this.standby_speed);
+         } else {
+            await this.send("G1 X" + x + " Y" + y + " F" + this.travel_speed);
+         }
       }
    }
 

@@ -56,10 +56,13 @@ class Word_path {
       this.y1 = y1;
       this.x2 = x2;
       this.y2 = y2;
-      this.walkCount = 0;
+      this.walk_count = 0;
       this.dist = -1;
    }
 }
+
+// whether or not we are in standby mode
+let active = false;
 
 // debugging hack
 let drawing_from_buffer = false;
@@ -302,12 +305,13 @@ cp_socket.on('connection', (socket) => {
       console.log("load_config");
       loadConfig();
       socket.emit('load_config',  {
-         travel_speed: plotter.travel_speed,
-         draw_speed:   plotter.draw_speed,
-         up_pos:       plotter.up_pos,
-         down_pos:     plotter.down_pos,
-         up_delay:     plotter.up_delay,
-         down_delay:   plotter.down_delay,
+         travel_speed:  plotter.travel_speed,
+         standby_speed: plotter.standby_speed,
+         draw_speed:    plotter.draw_speed,
+         up_pos:        plotter.up_pos,
+         down_pos:      plotter.down_pos,
+         up_delay:      plotter.up_delay,
+         down_delay:    plotter.down_delay,
          draw_x:             config.drawing.x,
          draw_y:             config.drawing.y,
          square_size:        config.drawing.square_size,
@@ -327,6 +331,8 @@ cp_socket.on('connection', (socket) => {
          text_spacing:       config.drawing.text_spacing,
          draw_unsolved:      config.drawing.draw_unsolved,
          autoplay:           config.drawing.autoplay,
+         standby_x:          config.drawing.standby_x,
+         standby_y:          config.drawing.standby_y,
          page_width:         config.page.width,
          page_height:        config.page.height,
          page_scale:         config.page.scale
@@ -335,12 +341,13 @@ cp_socket.on('connection', (socket) => {
 
    socket.on('save_config', (cp_config) => {
       console.log("save_config");
-      config.plotter.travel_speed = cp_config.travel_speed;
-      config.plotter.draw_speed   = cp_config.draw_speed;
-      config.plotter.up_pos       = cp_config.up_pos;
-      config.plotter.down_pos     = cp_config.down_pos;
-      config.plotter.up_delay     = cp_config.up_delay;
-      config.plotter.down_delay   = cp_config.down_delay;
+      config.plotter.travel_speed  = cp_config.travel_speed;
+      config.plotter.standby_speed = cp_config.standby_speed;
+      config.plotter.draw_speed    = cp_config.draw_speed;
+      config.plotter.up_pos        = cp_config.up_pos;
+      config.plotter.down_pos      = cp_config.down_pos;
+      config.plotter.up_delay      = cp_config.up_delay;
+      config.plotter.down_delay    = cp_config.down_delay;
       config.drawing.x                  = cp_config.draw_x;
       config.drawing.y                  = cp_config.draw_y;
       config.drawing.square_size        = cp_config.square_size;
@@ -360,16 +367,19 @@ cp_socket.on('connection', (socket) => {
       config.drawing.text_spacing       = cp_config.text_spacing;
       config.drawing.draw_unsolved      = cp_config.draw_unsolved;
       config.drawing.autoplay           = cp_config.autoplay;
+      config.drawing.standby_x          = cp_config.standby_x;
+      config.drawing.standby_y          = cp_config.standby_y;
       config.page.width    = cp_config.page_width;
       config.page.height   = cp_config.page_height;
       config.page.scale    = cp_config.page_scale;
 
-      plotter.travel_speed = config.plotter.travel_speed;
-      plotter.draw_speed   = config.plotter.draw_speed;
-      plotter.up_pos       = config.plotter.up_pos;
-      plotter.down_pos     = config.plotter.down_pos;
-      plotter.up_delay     = config.plotter.up_delay;
-      plotter.down_delay   = config.plotter.down_delay;
+      plotter.travel_speed  = config.plotter.travel_speed;
+      plotter.standby_speed = config.plotter.standby_speed;
+      plotter.draw_speed    = config.plotter.draw_speed;
+      plotter.up_pos        = config.plotter.up_pos;
+      plotter.down_pos      = config.plotter.down_pos;
+      plotter.up_delay      = config.plotter.up_delay;
+      plotter.down_delay    = config.plotter.down_delay;
 
       saveConfig(config_file);
    });
@@ -455,12 +465,13 @@ function loadConfig() {
       return console.log(err);
    }
 
-   plotter.travel_speed = config.plotter.travel_speed;
-   plotter.draw_speed   = config.plotter.draw_speed;
-   plotter.up_pos       = config.plotter.up_pos;
-   plotter.down_pos     = config.plotter.down_pos;
-   plotter.up_delay     = config.plotter.up_delay;
-   plotter.down_delay   = config.plotter.down_delay;
+   plotter.travel_speed  = config.plotter.travel_speed;
+   plotter.standby_speed = config.plotter.standby_speed;
+   plotter.draw_speed    = config.plotter.draw_speed;
+   plotter.up_pos        = config.plotter.up_pos;
+   plotter.down_pos      = config.plotter.down_pos;
+   plotter.up_delay      = config.plotter.up_delay;
+   plotter.down_delay    = config.plotter.down_delay;
 }
 
 // --------------------------- CROSSWORD --------------------------- //
@@ -511,6 +522,7 @@ async function drawFromBuffer() {
 
    if(!drawing_from_buffer) {
       drawing_from_buffer = true;
+      active = true;
       console.log("drawing from buffer");
       await plotter.endPlot(); // just in case
       let i = 0;
@@ -538,6 +550,7 @@ async function drawFromBuffer() {
          plotter.saveDrawing(drawing_file);
       }
       drawing_from_buffer = false;
+      active = false;
       standby();
 
    } else {
@@ -904,11 +917,19 @@ function annotateGridBounds(px, py, s) {
 
 // move pen outside the drawing somehwere
 async function standby() {
+   console.log("starting random walk...");
+   randomWalkUpdate();
+   while(!active) {
+      await randomWalk();
+   }
+
+   /*
    console.log("moving to standby.");
    await plotter.endPlot(); // just in case
    let x = config.drawing.x; // - 20;
    let y = config.drawing.y; // + Math.random() * crossword.height * config.drawing.square_size;
    await plotter.vertexPlot(x,y);
+   */
 }
 
 
@@ -924,27 +945,73 @@ function randomWalkUpdate() {
    }
 }
 
+async function randomWalk() {
+   randomWalkSort(getPosInGrid(true));
+
+   let max_walks = 0;
+   for (let i=0; i<word_paths.length; i++) {
+      max_walks = word_paths[i].walk_count > max_walks ? word_paths[i].walk_count : max_walks;
+   }
+
+   let w;
+   for (let i=0; i<word_paths.length; i++) {
+      if(word_paths[i].walk_count < max_walks) {
+         w = word_paths[i];
+         word_paths[i].walk_count++;
+         break;
+      }
+   }
+   if(w == undefined) {
+      w = word_paths[0];
+      word_paths[0].walk_count++;
+   }
+
+   let x1 = config.drawing.x + w.x1 * config.drawing.square_size;
+   let y1 = config.drawing.y + (crossword.height - w.y1) * config.drawing.square_size;
+   let x2 = config.drawing.x + w.x2 * config.drawing.square_size;
+   let y2 = config.drawing.y + (crossword.height - w.y2) * config.drawing.square_size;
+
+   x1 += config.drawing.standby_x;
+   y1 += config.drawing.standby_y;
+   x2 += config.drawing.standby_x;
+   y2 += config.drawing.standby_y;
+
+   await plotter.endPlot(); // just in case
+   await plotter.vertexPlot(x1,y1,true);
+   await plotter.vertexPlot(x2,y2,true);
+
+   // how to see if the plotter has finished walking the current word?
+   // for some reason is always in idle state instead of run, otherwise could have used state for this
+   // small hack to see when it has reached its destination
+   let d = 9999;
+   while (d > 0.1) {
+      let p = getPosInGrid(true);
+      d = dist(p.x, p.y, w.x2, w.y2);
+      // wait for the ping interval
+      await new Promise(resolve => setTimeout(resolve, config.plotter.ping_interval));
+   }
+}
+
 // sort word_paths[] based on distance to the current position x,y of the plotter
-function randomWalkSort(x,y) {
+function randomWalkSort(current_pos) {
 
    // calculate the distance to every path
    for (let i=0; i<word_paths.length; i++) {
-      let d1 = dist(x, y, word_paths[i].x1, word_paths[i].y1);
-      let d2 = dist(x, y, word_paths[i].x2, word_paths[i].y2);
-      if(d1 < d1) {
+      let d1 = dist(current_pos.x, current_pos.y, word_paths[i].x1, word_paths[i].y1);
+      let d2 = dist(current_pos.x, current_pos.y, word_paths[i].x2, word_paths[i].y2);
+      if(d1 < d2) {
          word_paths[i].dist = d1;
       } else {
          word_paths[i].dist = d2;
          // flip the path direction if x2,y2 is closer
          let x = word_paths[i].x1;
-         let y = word_paths[i].x1;
+         let y = word_paths[i].y1;
          word_paths[i].x1 = word_paths[i].x2;
          word_paths[i].y1 = word_paths[i].y2;
          word_paths[i].x2 = x;
          word_paths[i].y2 = y;
       }
    }
-
    // sort the paths by distance
    let buffer = [];
    for (let i=0; i<word_paths.length; i++) {
@@ -955,29 +1022,52 @@ function randomWalkSort(x,y) {
             buffer.splice(h,0,p);
             break;
          }
+         h++;
       }
-      if(buffer.length == 0) {
+      if(buffer.length == 0 || h >= buffer.length) {
          buffer.push(p);
       }
    }
    word_paths = buffer;
 }
 
-function randomWalkNext() {
-   /*
-   randomly choose between the closest words, taking into account
-   how many times we have already walked that word since the last randomWalkUpdate()
-   */
-}
-
 // get the current position of the plotter inside the game grid based on grbl x,y position
-function getGridPos() {
+function getPosInGrid(standby_offset = false) {
 
+   // position relative to work offset
+   let x = plotter.current_pos.x - plotter.work_offset.x;
+   let y = plotter.current_pos.y - plotter.work_offset.y;
+
+   // subtract standby offset if in standby mode
+   if(standby_offset) {
+      x -= config.drawing.standby_x;
+      y -= config.drawing.standby_y;
+   }
+
+   // relative to grid position
+   x -= config.drawing.x;
+   y -= config.drawing.y;
+
+   // scaled to grid square size;
+   x /= config.drawing.square_size;
+   y /= config.drawing.square_size;
+
+   // constrain to grid
+   x = x > crossword.width ? crossword.width : x;
+   x = x < 0 ? 0 : x;
+   y = y > crossword.width ? crossword.width : y;
+   y = y < 0 ? 0 : y;
+
+   // flip y axis
+   y = crossword.height - y;
+
+   let pos = {x: x, y: y};
+   return pos;
 }
 
 
 function dist(x1,y1,x2,y2) {
-   d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+   let d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
    return d;
 }
 
