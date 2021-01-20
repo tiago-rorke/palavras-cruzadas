@@ -398,7 +398,7 @@ cp_socket.on('connection', (socket) => {
       clearDrawLog();
    });
    socket.on('undraw_line', () => {
-      console.log("move 1 line from log to buffer", draw_buffer.length, draw_log.length);
+      console.log("move 1 line from log to buffer", plotter.draw_buffer.length, plotter.draw_log.length);
       undrawLastLine();
    });
 
