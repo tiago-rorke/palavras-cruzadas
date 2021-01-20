@@ -331,6 +331,7 @@ cp_socket.on('connection', (socket) => {
          text_spacing:       config.drawing.text_spacing,
          draw_unsolved:      config.drawing.draw_unsolved,
          autoplay:           config.drawing.autoplay,
+         standby_wander:     config.drawing.standby_wander,
          standby_x:          config.drawing.standby_x,
          standby_y:          config.drawing.standby_y,
          page_width:         config.page.width,
@@ -367,6 +368,7 @@ cp_socket.on('connection', (socket) => {
       config.drawing.text_spacing       = cp_config.text_spacing;
       config.drawing.draw_unsolved      = cp_config.draw_unsolved;
       config.drawing.autoplay           = cp_config.autoplay;
+      config.drawing.standby_wander     = cp_config.standby_wander;
       config.drawing.standby_x          = cp_config.standby_x;
       config.drawing.standby_y          = cp_config.standby_y;
       config.page.width    = cp_config.page_width;
@@ -394,6 +396,10 @@ cp_socket.on('connection', (socket) => {
    });
    socket.on('clear_draw_log', () => {
       clearDrawLog();
+   });
+   socket.on('undraw_line', () => {
+      console.log("move 1 line from log to buffer", draw_buffer.length, draw_log.length);
+      undrawLastLine();
    });
 
    socket.on('update_drawing', () => {
@@ -562,6 +568,12 @@ async function drawFromBuffer() {
    });
 }
 
+function undrawLastLine() {
+   config.drawing.autoplay = false;
+   let p = plotter.draw_log.pop();
+   plotter.draw_buffer.unshift(p);
+   plotter.saveDrawing(drawing_file);
+}
 
 // ---------------------------- DRAWING ---------------------------- //
 
@@ -917,19 +929,20 @@ function annotateGridBounds(px, py, s) {
 
 // move pen outside the drawing somehwere
 async function standby() {
-   console.log("starting random walk...");
-   randomWalkUpdate();
-   while(!active) {
-      await randomWalk();
+   if(config.drawing.standby_wander) {
+      console.log("starting random walk...");
+      randomWalkUpdate();
+      while(!active) {
+         await randomWalk();
+      }
+   } else {
+      console.log("moving to static standby position...");
+      await plotter.endPlot(); // just in case
+      let x = config.drawing.x; // - 20;
+      let y = config.drawing.y; // + Math.random() * crossword.height * config.drawing.square_size;
+      await plotter.vertexPlot(x,y);
    }
 
-   /*
-   console.log("moving to standby.");
-   await plotter.endPlot(); // just in case
-   let x = config.drawing.x; // - 20;
-   let y = config.drawing.y; // + Math.random() * crossword.height * config.drawing.square_size;
-   await plotter.vertexPlot(x,y);
-   */
 }
 
 

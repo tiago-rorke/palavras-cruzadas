@@ -194,6 +194,7 @@ $(function () {
       document.getElementById('vertical_first').checked   = !config.horizontal_first;
       document.getElementById('draw_unsolved').checked    = config.draw_unsolved;
       document.getElementById('autoplay').checked         = config.autoplay;
+      document.getElementById('standby_wander').checked   = config.standby_wander;
       document.getElementById('standby_x').value          = config.standby_x;
       document.getElementById('standby_y').value          = config.standby_y;
       document.getElementById('page_width').value         = config.page_width;
@@ -231,6 +232,7 @@ $(function () {
          horizontal_first   : document.getElementById('horizontal_first').checked,
          draw_unsolved      : document.getElementById('draw_unsolved').checked,
          autoplay           : document.getElementById('autoplay').checked,
+         standby_wander     : document.getElementById('standby_wander').checked,
          standby_x          : Number(document.getElementById('standby_x').value),
          standby_y          : Number(document.getElementById('standby_y').value),
          page_width         : Number(document.getElementById('page_width').value),
@@ -266,6 +268,12 @@ $(function () {
    clear_draw_log.onclick = () => {
       console.log('clear_draw_log');
       socket.emit('clear_draw_log');
+   }
+   let undraw_line = document.getElementById('undraw_line');
+   undraw_line.onclick = () => {
+      console.log('undraw_line');
+      socket.emit('undraw_line');
+      socket.emit('load_config');
    }
    let draw_text = document.getElementById('draw_text');
    draw_text.onclick = () => {

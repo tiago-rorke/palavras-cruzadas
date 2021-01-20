@@ -38,6 +38,7 @@
   "footer_label_end":          "END     = ",
   "footer_label_player_count": "PLAYERS = ",
   "draw_unsolved": false,
+  "standby_wander": false,
   "standby_x": -20,
   "standby_y": -30,
  },

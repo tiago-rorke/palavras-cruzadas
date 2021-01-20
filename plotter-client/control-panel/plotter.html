@@ -63,6 +63,8 @@
       <button id="clear_draw_log" type="button">clear log (blue)</button><br />
       <button id="clear_drawing" type="button">clear all</button><br />
       <br />
+      <button id="undraw_line" type="button">undraw last line (disables autoplay)</button><br />
+      <br />
       <input style="width:100px" id="page_width" type="number" value="1000" step="10"/><span>  page width (mm)</span><br />
       <input style="width:100px" id="page_height" type="number" value="700" step="10"/><span>  page height (mm)</span><br />
       <input style="width:100px" id="page_scale" type="number" value="0.75" step="0.1"/><span>  page render scale (px/mm)</span><br />
@@ -125,8 +127,9 @@
       <input style="width:100px" type="number" step="10"  id="down_delay"   /><span> down delay</span><br />
       <input style="width:100px" type="number" step="10"  id="up_delay"     /><span> up delay</span><br />
       <br />
-      <input style="width:100px" id="standby_x" type="number" value="-20" /><span> standby offset x</span><br />
-      <input style="width:100px" id="standby_y" type="number" value="-20" /><span> standby offset y</span><br />
+      <input type="checkbox" id="standby_wander" ><span>random wander in standby</span><br />
+      <input style="width:100px" id="standby_x" type="number" value="-20" /><span> wander offset x</span><br />
+      <input style="width:100px" id="standby_y" type="number" value="-20" /><span> wander offset y</span><br />
       <br />
       </div>
    </body>
