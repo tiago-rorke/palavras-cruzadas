@@ -28,6 +28,10 @@ internal.Plotter = class {
       this.up_pos;
       this.down_pos;
 
+      // for monitoring position
+      this.current_pos;
+      this.work_offset;
+
       this.draw_buffer = [];      // lines to draw
       this.draw_log = [];         // lines already drawn
       this.draw_annotations = []; // lines to render in preview but never draw

@@ -48,6 +48,18 @@ loadConfig();
 
 let random_words = fs.readFileSync('./data/random_words.txt').toString().split('\n');
 
+// standby mode random walk
+let word_paths = []; // array of the start and end coordinates of each word
+class Word_path {
+   constructor(x1, y1, x2, y2) {
+      this.x1 = x1;
+      this.y1 = y1;
+      this.x2 = x2;
+      this.y2 = y2;
+      this.walkCount = 0;
+      this.dist = -1;
+   }
+}
 
 // debugging hack
 let drawing_from_buffer = false;
@@ -56,6 +68,7 @@ let drawing_from_buffer = false;
 // --------------------------- STARTUP ----------------------------- //
 
 plotter.init();
+//plotter.unlock();
 
 try {
    let game = fs.readFileSync(game_file, 'utf8');
@@ -93,6 +106,19 @@ try {
       throw err;
    }
 }
+
+// ping the plotter to show current position in the preview
+pingLoop();
+
+async function pingLoop() {
+   while(true) {
+      updatePos();
+      await new Promise(resolve => setTimeout(resolve, config.plotter.ping_interval));
+   }
+}
+
+
+
 // -------------------- SERVER <> CLIENT COMMS --------------------- //
 
 
@@ -466,14 +492,18 @@ function endGame() {
 // ------------------------------ GUI ------------------------------ //
 
 
-function updatePlotterRender() {
-   clearAnnotations();
-   annotateGridBounds();
-   annotateFooterBounds();
-   cp_socket.emit('update_drawing', 
-      plotter.draw_buffer, 
-      plotter.draw_log, 
-      plotter.draw_annotations
+function updatePlotterRender(refresh_annotations = true) {
+   if(refresh_annotations) {
+      clearAnnotations();
+      annotateGridBounds();
+      annotateFooterBounds();
+   }
+   cp_socket.emit('update_drawing',
+      plotter.draw_buffer,
+      plotter.draw_log,
+      plotter.draw_annotations,
+      plotter.current_pos,
+      plotter.work_offset
       );
 }
 
@@ -521,6 +551,18 @@ async function drawFromBuffer() {
 
 
 // ---------------------------- DRAWING ---------------------------- //
+
+
+async function updatePos() {
+   let status = await plotter.status();
+   plotter.current_pos = status.machinePosition;
+   if(status.workCoordinateOffset !== undefined) {
+      plotter.work_offset = status.workCoordinateOffset;
+   }
+   updatePlotterRender(false);
+   //console.log(status);
+   //console.log(status.machinePosition.x, status.machinePosition.y);
+}
 
 function clearDrawing() {
    console.log("clearing drawing");
@@ -868,6 +910,78 @@ async function standby() {
    let y = config.drawing.y; // + Math.random() * crossword.height * config.drawing.square_size;
    await plotter.vertexPlot(x,y);
 }
+
+
+// rebuild word_paths[] based on crossword.words[]
+function randomWalkUpdate() {
+   word_paths = [];
+   for (let i=0; i<crossword.words.length; i++) {
+      let w = crossword.words[i];
+      let x2 = w.horizontal ? w.x + w.word.length : w.x;
+      let y2 = w.horizontal ? w.y : w.y + w.word.length;
+      let wp = new Word_path(w.x,w.y, x2, y2);
+      word_paths.push(wp);
+   }
+}
+
+// sort word_paths[] based on distance to the current position x,y of the plotter
+function randomWalkSort(x,y) {
+
+   // calculate the distance to every path
+   for (let i=0; i<word_paths.length; i++) {
+      let d1 = dist(x, y, word_paths[i].x1, word_paths[i].y1);
+      let d2 = dist(x, y, word_paths[i].x2, word_paths[i].y2);
+      if(d1 < d1) {
+         word_paths[i].dist = d1;
+      } else {
+         word_paths[i].dist = d2;
+         // flip the path direction if x2,y2 is closer
+         let x = word_paths[i].x1;
+         let y = word_paths[i].x1;
+         word_paths[i].x1 = word_paths[i].x2;
+         word_paths[i].y1 = word_paths[i].y2;
+         word_paths[i].x2 = x;
+         word_paths[i].y2 = y;
+      }
+   }
+
+   // sort the paths by distance
+   let buffer = [];
+   for (let i=0; i<word_paths.length; i++) {
+      let p = word_paths[i];
+      let h = 0;
+      while (h<buffer.length) {
+         if(buffer[h].dist > p.dist) {
+            buffer.splice(h,0,p);
+            break;
+         }
+      }
+      if(buffer.length == 0) {
+         buffer.push(p);
+      }
+   }
+   word_paths = buffer;
+}
+
+function randomWalkNext() {
+   /*
+   randomly choose between the closest words, taking into account
+   how many times we have already walked that word since the last randomWalkUpdate()
+   */
+}
+
+// get the current position of the plotter inside the game grid based on grbl x,y position
+function getGridPos() {
+
+}
+
+
+function dist(x1,y1,x2,y2) {
+   d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+   return d;
+}
+
+
 
 /*
 function drawAlphabet(float x, float y, float fontScale) {

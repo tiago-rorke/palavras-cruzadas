@@ -238,9 +238,9 @@ $(function () {
       });
    }
 
-   socket.on('update_drawing', (draw_buffer, draw_log, draw_annotations) => {
+   socket.on('update_drawing', (draw_buffer, draw_log, draw_annotations, current_pos, work_offset) => {
       console.log('update drawing');
-      plotter_render.update(draw_buffer, draw_log, draw_annotations);
+      plotter_render.update(draw_buffer, draw_log, draw_annotations, current_pos, work_offset);
    });
 
    // --------------- DRAWING ----------------- //

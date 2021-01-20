@@ -23,8 +23,9 @@ const plotter_p5 = (s) => {
       s.background(255);
    }
 
-   s.update = (draw_buffer, draw_log, draw_annotations) => {
+   s.update = (draw_buffer, draw_log, draw_annotations, current_pos, work_offset) => {
       s.background(255);
+      s.noFill();
 
       // drawn lines
       for(let i=0; i<draw_log.length-1; i++) {
@@ -65,6 +66,14 @@ const plotter_p5 = (s) => {
          s.stroke(255,255,0, c);
          s.line(x1, s.height - y1, x2, s.height - y2);
       }
+
+      // current machine position
+      s.noStroke();
+      s.fill(255,0,0);
+      s.ellipse(
+         scale * (current_pos.x - work_offset.x),
+         s.height - scale * (current_pos.y - work_offset.y),
+         10, 10);
    }
 }
 

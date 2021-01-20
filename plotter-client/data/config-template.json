@@ -6,6 +6,7 @@
  "plotter": {
   "port": "/dev/ttyUSB0",
   "baud": 115200,
+  "ping_interval": 500,
   "travel_speed": 9000,
   "draw_speed": 3000,
   "up_pos": 200,
@@ -15,6 +16,7 @@
  },
  "drawing": {
   "autoplay": false,
+  "ping_interval": 500,
   "x": 50,
   "y": 60,
   "square_size": 14,
